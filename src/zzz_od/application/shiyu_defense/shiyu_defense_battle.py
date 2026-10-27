@@ -1,5 +1,8 @@
+import re
 from typing import ClassVar
 
+import cv2
+import numpy as np
 from cv2.typing import MatLike
 
 from one_dragon.base.geometry.rectangle import Rect
@@ -7,6 +10,7 @@ from one_dragon.base.operation.operation import Operation
 from one_dragon.base.operation.operation_edge import node_from
 from one_dragon.base.operation.operation_node import operation_node
 from one_dragon.base.operation.operation_round_result import OperationRoundResult
+from one_dragon.utils import cv2_utils
 from one_dragon.utils.i18_utils import gt
 from zzz_od.auto_battle import auto_battle_utils
 from zzz_od.config.team_config import PredefinedTeamInfo
@@ -21,6 +25,13 @@ class ShiyuDefenseBattle(ZOperation):
     STATUS_FAIL_TO_MOVE: ClassVar[str] = '移动失败'
     STATUS_BATTLE_TIMEOUT: ClassVar[str] = '战斗超时'
     STATUS_TO_NEXT_PHASE: ClassVar[str] = '下一阶段'
+
+    # 阶段开始后这段时间内 不用「连续没有倒计时」判断战斗结束（开头约 8 秒倒计时位置显示任务提示）
+    PHASE_START_GRACE_SECONDS: ClassVar[float] = 12
+
+    # 倒计时文字 例如 00:01:10 小时位一直是 00 OCR 有时会把冒号读丢
+    # 只允许冒号或没有分隔 避免把同一位置的分数（如 3425/8000）当成时间
+    COUNTDOWN_TEXT_PATTERN: ClassVar[re.Pattern] = re.compile(r'00:?\d{2}:?\d{2}')
 
     def __init__(self, ctx: ZContext, predefined_team_idx: int):
         """
@@ -43,6 +54,7 @@ class ShiyuDefenseBattle(ZOperation):
         self.battle_fail: str | None = None  # 战斗失败的原因
         self.find_interact_btn_times: int = 0  # 发现交互按钮的次数
         self.no_countdown_start_time: float | None = None  # 连续没有倒计时的开始时间戳
+        self.battle_start_time: float = 0  # 本阶段开始自动战斗的截图时间
 
     @operation_node(name='加载自动战斗指令', is_start_node=True)
     def load_auto_op(self) -> OperationRoundResult:
@@ -64,6 +76,7 @@ class ShiyuDefenseBattle(ZOperation):
         # 在移动阶段也检测倒计时，一旦检测到倒计时就停止移动开始战斗
         if self.check_shiyu_countdown(self.last_screenshot):
             self.ctx.auto_battle_context.start_auto_battle()
+            self.battle_start_time = self.last_screenshot_time
             self.move_times = 0
             return self.round_success()
         self.check_distance(self.last_screenshot)
@@ -71,6 +84,7 @@ class ShiyuDefenseBattle(ZOperation):
         if self.distance_pos is None:
             if self.ctx.auto_battle_context.without_distance_times >= 10:
                 self.ctx.auto_battle_context.start_auto_battle()
+                self.battle_start_time = self.last_screenshot_time
                 self.move_times = 0
                 return self.round_success()
             else:
@@ -122,6 +136,12 @@ class ShiyuDefenseBattle(ZOperation):
                 # 还没到检测间隔
                 return self.round_wait(wait=self.ctx.battle_assistant_config.screenshot_interval)
 
+            # 每个阶段开头约 8 秒 倒计时的位置显示的是任务提示（如「…内击败所有敌对单位」）
+            # 这时看不到倒计时是正常的 不能算作战斗结束 否则 Boss 出场前就会进入战斗后移动
+            if current_time - self.battle_start_time < ShiyuDefenseBattle.PHASE_START_GRACE_SECONDS:
+                self.no_countdown_start_time = None
+                return self.round_wait(wait=self.ctx.battle_assistant_config.screenshot_interval)
+
             # 执行倒计时检测
             self._last_countdown_check_time = current_time
             if self.check_shiyu_countdown(self.last_screenshot):
@@ -163,6 +183,7 @@ class ShiyuDefenseBattle(ZOperation):
         if self.check_shiyu_countdown(self.last_screenshot):
             # 重新启动自动战斗
             self.ctx.auto_battle_context.start_auto_battle()
+            self.battle_start_time = self.last_screenshot_time
             # 重置移动次数和连续无倒计时记录
             self.move_times = 0
             self.no_countdown_start_time = None
@@ -251,10 +272,58 @@ class ShiyuDefenseBattle(ZOperation):
             has_countdown2 = result2 is not None and result2.is_success and len(result2.contours) == 4
 
             # 只要有一个倒计时被检测到，就认为有倒计时
-            return has_countdown1 or has_countdown2
+            if has_countdown1 or has_countdown2:
+                return True
+
+            if self._is_boss_hp_bar_present(screen):
+                return True
+
+            return self._check_countdown_by_ocr(screen)
 
         except Exception:
             return False
+
+    def _is_boss_hp_bar_present(self, screen: MatLike) -> bool:
+        """
+        右上角是否有 Boss 血条 画面配置了「式舆防卫战-Boss血条」区域时才使用
+
+        Boss 进入特殊机制阶段时 倒计时的位置会换成机制提示（如「攻击核心可造成更高伤害」）
+        整段都看不到倒计时 但战斗还在继续 只要 Boss 血条还在就不能当成这一层打完了
+        血条上下各有一条很长的黑色边框 中间是血量填充 用这个结构判断（实测各类非 Boss 画面都不会误判）
+        :return: 是否有 Boss 血条
+        """
+        area = self.ctx.screen_loader.get_area('战斗画面', '式舆防卫战-Boss血条')
+        if area is None:
+            return False
+        part = cv2_utils.crop_image_only(screen, area.rect)
+        if part is None or part.shape[0] < 20:
+            return False
+        value = cv2.cvtColor(part, cv2.COLOR_RGB2HSV)[:, :, 2]
+        h = value.shape[0]
+        edge = max(h // 7, 1)
+        top_dark = float(np.mean(value[:edge] < 60))
+        bottom_dark = float(np.mean(value[h - edge:] < 60))
+        middle_dark = float(np.mean(value[edge + 1:h - edge - 1] < 60))
+        return top_dark >= 0.9 and bottom_dark >= 0.9 and middle_dark < 0.7
+
+    def _check_countdown_by_ocr(self, screen: MatLike) -> bool:
+        """
+        用 OCR 读倒计时的时间文字 画面配置了「式舆防卫战-倒计时文字」区域时才使用
+
+        移动端的倒计时是数码管字体 没点亮的笔画也会显示成暗灰色
+        上面按轮廓个数判断时 轮廓数会随分钟、秒钟的数字变化（实测剩余约 1 分 10 秒时从 4 变成 3）
+        连续 5 秒判断不到就会被当成战斗结束 站着不动
+        :return: 是否读到了时间
+        """
+        for area_name in ['式舆防卫战-倒计时文字', '式舆防卫战-倒计时文字-精英']:
+            area = self.ctx.screen_loader.get_area('战斗画面', area_name)
+            if area is None:
+                continue
+            ocr_result_map = self.ctx.ocr.run_ocr(cv2_utils.crop_image_only(screen, area.rect))
+            text = ''.join(ocr_result_map.keys()).replace(' ', '')
+            if ShiyuDefenseBattle.COUNTDOWN_TEXT_PATTERN.search(text):
+                return True
+        return False
 
     def check_teleport_point(self, screen: MatLike) -> Rect | None:
         """
@@ -323,6 +392,9 @@ class ShiyuDefenseBattle(ZOperation):
     @operation_node(name='等待退出', node_max_retry_times=60)
     def wait_exit(self) -> OperationRoundResult:
         result = self.round_by_find_area(self.last_screenshot, '式舆防卫战', '战报')
+        if not result.is_success:
+            # 多间模式（节点 5）撤退后回到的是三间选择画面 没有「战报」 也算已经退出
+            result = self.round_by_find_area(self.last_screenshot, '式舆防卫战-三间选择', '本期最佳总分')
 
         if result.is_success:
             if self.battle_fail is None:

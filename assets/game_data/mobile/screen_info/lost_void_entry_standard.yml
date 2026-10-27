@@ -1,0 +1,10 @@
+# 迷失之地-入口-常规 的移动端差异 其余区域沿用 assets/game_data/screen_info/lost_void_entry_standard.yml
+# TAB 位置和样式见 lost_void_entry_periodic.yml；常规页的其它区域（战线肃清、作战潜能等）还没在移动端截到
+screen_id: lost_void_entry_standard
+area_list:
+- area_name: 按钮-常规
+  pc_rect: [1585, 35, 1680, 88]
+- area_name: 按钮-周期
+  pc_rect: [1360, 35, 1460, 88]
+- area_name: 探索收集
+  pc_rect: [1600, 985, 1780, 1050]

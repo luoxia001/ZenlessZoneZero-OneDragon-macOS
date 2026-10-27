@@ -1,8 +1,11 @@
+import copy
+
 import cv2
 import numpy as np
 from cv2.typing import MatLike
 from typing import Optional
 
+from one_dragon.base.screen.template_info import TemplateInfo
 from one_dragon.utils import cv2_utils
 from zzz_od.context.zzz_context import ZContext
 from zzz_od.game_data.agent import AgentStateDef
@@ -29,6 +32,69 @@ def get_template(ctx: ZContext, state_def: AgentStateDef,
     return template
 
 
+# 模板配置里 state_override 可以覆盖的识别参数
+_STATE_OVERRIDE_FIELDS: set[str] = {
+    'lower_color', 'upper_color', 'hsv_color', 'hsv_color_diff',
+    'connect_cnt', 'split_color_range', 'max_length', 'template_threshold',
+}
+
+
+def get_template_and_state(ctx: ZContext, state_def: AgentStateDef,
+                           total: int | None = None, pos: int | None = None) -> tuple[TemplateInfo | None, AgentStateDef]:
+    """
+    获取状态模板 以及按模板配置调整后的状态定义
+
+    模板的 config.yml 可以写 state_override 覆盖识别参数（颜色范围、连通块大小等）
+    用于画面变体（如移动端）里同一个状态的颜色和 PC 不同 但不想改动状态定义的情况
+
+    :return: (模板, 状态定义) 没有覆盖时返回原状态定义
+    """
+    template = get_template(ctx, state_def, total, pos)
+    if template is None:
+        return None, state_def
+    override = template.get('state_override', None)
+    if not override:
+        return template, state_def
+    new_state_def = copy.copy(state_def)
+    for key, value in override.items():
+        if key not in _STATE_OVERRIDE_FIELDS:
+            log.warning(f'状态模板 {template.template_id} 的 state_override 不支持字段 {key}')
+            continue
+        setattr(new_state_def, key, tuple(value) if isinstance(value, list) else value)
+    return template, new_state_def
+
+
+def is_unknown_by_template(template: TemplateInfo, part: MatLike) -> bool:
+    """
+    裁剪出的图片是否处在「读不出来」的样子 模板 config.yml 里配置 unknown_when 时生效
+
+    例如移动端按下特殊技按钮时 按钮会变成白底黑星 这时看不出技能是否可用
+    如果照常判断会读成「不可用」 让依赖它的规则误判（例如 柳 刚按下特殊技就因为「不可用」被打断）
+
+    unknown_when:
+      hsv_color: [h, s, v]
+      hsv_color_diff: [dh, ds, dv]
+      ratio: 0.4  # 落在颜色范围内的像素占比达到这个值 就认为读不出来
+    """
+    rule = template.get('unknown_when', None)
+    if not rule or part is None or part.size == 0:
+        return False
+    hsv = cv2.cvtColor(part, cv2.COLOR_RGB2HSV)
+    color = np.array(rule['hsv_color'], dtype=int)
+    diff = np.array(rule['hsv_color_diff'], dtype=int)
+    lower = np.clip(color - diff, 0, 255).astype(np.uint8)
+    upper = np.clip(color + diff, 0, 255).astype(np.uint8)
+    in_range = cv2.inRange(hsv, lower, upper) > 0
+    if template.mask is not None:
+        valid = template.mask > 0
+        if valid.sum() == 0:
+            return False
+        ratio = float(in_range[valid].mean())
+    else:
+        ratio = float(in_range.mean())
+    return ratio >= float(rule.get('ratio', 0.4))
+
+
 def check_cnt_by_color_range(
         ctx: ZContext,
         screen: MatLike,
@@ -45,10 +111,12 @@ def check_cnt_by_color_range(
     :param pos: 角色位置 从1开始
     :return:
     """
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return 0
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     part = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
+    if is_unknown_by_template(template, part):  # 例如按钮正被按着 看不出状态
+        return -1
     to_check = cv2.bitwise_and(part, part, mask=template.mask)
 
     mask = filter_by_color(to_check, state_def)
@@ -84,6 +152,8 @@ def check_exist_by_color_range(
     :return 存在返回1 不存在返回0
     """
     cnt = check_cnt_by_color_range(ctx, screen, state_def, total, pos)
+    if cnt < 0:  # 读不出来
+        return -1
     return 1 if cnt > 0 else 0
 
 
@@ -103,9 +173,9 @@ def check_length_by_background_gray(
     :param pos: 角色位置 从1开始
     :return: 0~100
     """
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return 0
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     part = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
     # 模版需要保证高度是1
     to_check = part
@@ -160,9 +230,9 @@ def check_length_by_foreground_gray(
     :param pos: 角色位置 从1开始
     :return: 0~100
     """
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return 0
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     part = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
     # 模版需要保证高度是1
     gray = cv2.cvtColor(part, cv2.COLOR_RGB2GRAY).mean(axis=0)
@@ -173,6 +243,8 @@ def check_length_by_foreground_gray(
     mask = (gray >= state_def.lower_color) & (gray <= state_def.upper_color)
     mask_idx = np.where(mask)
     total_cnt = len(gray)
+    if total_cnt == 0:  # 整行都是分隔色（如黑屏）时没有可统计的像素
+        return 0
 
     left = np.min(mask_idx, initial=total_cnt+1)
     right = np.max(mask_idx, initial=0)
@@ -202,9 +274,9 @@ def check_length_by_foreground_color(
     :param pos: 角色位置 从1开始
     :return: 0~100
     """
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return 0
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     part = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
     to_check = part
 
@@ -248,9 +320,9 @@ def check_template_not_found(
     :param pos: 角色位置 从1开始
     :return: 找不到对应模板返回1 否则返回0
     """
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return False
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     to_check = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
     mrl = cv2_utils.match_template(source=to_check, template=template.raw, mask=template.mask,
                                    threshold=state_def.template_threshold)
@@ -274,9 +346,9 @@ def check_template_found(
     :param pos: 角色位置 从1开始
     :return: 找不到对应模板返回1 否则返回0
     """
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return False
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     to_check = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
     mrl = cv2_utils.match_template(source=to_check, template=template.raw, mask=template.mask,
                                    threshold=state_def.template_threshold)
@@ -300,9 +372,9 @@ def check_cnt_by_color_channel_max_range(
     :param pos: 角色位置 从1开始
     :return:
     """
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return 0
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     part = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
     to_check = cv2.bitwise_and(part, part, mask=template.mask)
 
@@ -339,6 +411,8 @@ def check_exist_by_color_channel_max_range(
     :param pos: 角色位置 从1开始
     """
     cnt = check_cnt_by_color_channel_max_range(ctx, screen, state_def, total, pos)
+    if cnt < 0:  # 读不出来
+        return -1
     return 1 if cnt > 0 else 0
 
 
@@ -350,9 +424,9 @@ def check_cnt_by_color_channel_equal_range(
         pos: Optional[int] = None
 ) -> int:
     # 1. 获取模板并裁剪目标区域
-    template = get_template(ctx, state_def, total, pos)
-    if template is None:
-        return 0
+    template, state_def = get_template_and_state(ctx, state_def, total, pos)
+    if template is None:  # 没有这个状态的模板 读不出来 返回 -1 不记录状态
+        return -1
     part = cv2_utils.crop_image_only(screen, template.get_template_rect_by_point())
     to_check = cv2.bitwise_and(part, part, mask=template.mask)
 

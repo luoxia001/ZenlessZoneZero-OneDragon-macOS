@@ -490,13 +490,7 @@ class HomeInterface(BaseInterface):
             self.main_window.areaLayout.setContentsMargins(0, 0, 0, 0)
             self._set_title_bar_home_mode(True)
 
-        check_resource_updates = getattr(
-            self.main_window,
-            'check_resource_updates',
-            None,
-        )
-        if callable(check_resource_updates):
-            check_resource_updates()
+        # 不在进入首页时自动检查启动器 / 模型更新 需要时到「资源管理」手动检查
 
         # Banner 刷新检查不需要冷却，因为它依赖信号
         if not self._check_banner_runner.isRunning():

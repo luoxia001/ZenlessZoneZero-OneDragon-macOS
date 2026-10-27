@@ -106,10 +106,9 @@ class ZContext(OneDragonContext):
         """
         切换实例后更新 controller 的窗口标题和账号配置
         """
-        from zzz_od.controller.zzz_pc_controller import ZPcController
-
         controller = self.controller
-        if not isinstance(controller, ZPcController):
+        # 不直接 import ZPcController 判断类型 它依赖 pywin32 在 macOS 上无法导入
+        if controller is None or not hasattr(controller, 'sync_game_config'):
             return
 
         new_win_title = self._get_win_title()
@@ -130,6 +129,34 @@ class ZContext(OneDragonContext):
             )
             # 初始化窗口标题
             self.controller.set_window_title(self._get_win_title())
+            self._update_screen_variant(None)
+        elif self.game_account_config.platform == GamePlatformEnum.PLAYCOVER.value.value:
+            if self.controller is not None:
+                self.controller.cleanup_after_app_shutdown()
+            from zzz_od.controller.zzz_maatools_controller import ZMaaToolsController
+            self.controller: ZMaaToolsController = ZMaaToolsController(
+                game_config=self.game_config,
+                win_title=self._get_win_title(),
+                standard_width=self.project_config.screen_standard_width,
+                standard_height=self.project_config.screen_standard_height
+            )
+            self._update_screen_variant('mobile')
+
+    def _update_screen_variant(self, variant: str | None) -> None:
+        """
+        按平台切换画面变体 移动端会在基础画面上叠加 assets/game_data/mobile/screen_info/
+
+        Args:
+            variant: 变体名称 为空时只使用基础画面
+        """
+        # 模板变体和画面变体同名 例如 mobile → assets/template/mobile_*/
+        self.template_loader.set_template_variant(variant)
+        if not self.screen_loader.set_screen_variant(variant):
+            return
+        self.screen_loader.reload()
+        self._load_plugin_screens()
+        if self.ready_for_application:  # 初始化完成后才切换的 需要刷新依赖画面区域的服务
+            self.init_for_application()
 
     def init_for_application(self) -> None:
         self.map_service.reload()  # 传送需要用的数据

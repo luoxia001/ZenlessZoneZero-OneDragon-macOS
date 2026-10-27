@@ -1,0 +1,8 @@
+sub_dir: mobile_intel_board
+template_id: refresh
+template_name: 刷新
+template_shape: circle
+auto_mask: true
+point_list:
+- 750, 1017
+- 778, 1017

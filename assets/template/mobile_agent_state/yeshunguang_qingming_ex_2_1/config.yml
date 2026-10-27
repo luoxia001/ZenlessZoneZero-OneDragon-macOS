@@ -1,0 +1,24 @@
+sub_dir: mobile_agent_state
+template_id: yeshunguang_qingming_ex_2_1
+template_name: 叶瞬光-青溟剑势-白
+template_shape: multi_rect
+auto_mask: true
+point_list:
+- 120, 153
+- 130, 163
+- 153, 153
+- 163, 163
+- 185, 153
+- 195, 163
+- 218, 153
+- 228, 163
+- 250, 153
+- 260, 163
+- 283, 153
+- 293, 163
+# 强化后 6 个大菱形 点亮的是纯白填充（V=255 S=0） 未点亮是暗色（V≈40~130）
+# 常态下点亮的小菱形也很亮 但边缘偏粉（S 均值约 24） 所以要求饱和度 ≤2 且连通块 ≥40 才算
+state_override:
+  hsv_color: [90, 1, 250]
+  hsv_color_diff: [90, 1, 5]
+  connect_cnt: 40

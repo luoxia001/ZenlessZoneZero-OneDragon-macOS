@@ -139,8 +139,7 @@ class ResourceUpdateCoordinator(QObject):
     def on_welcome_dialog_closed(self) -> None:
         """首次欢迎弹窗结束后，才允许展示资源更新弹窗。"""
         self._welcome_dialog_closed = True
-        if not self._checks_started:
-            self.check_updates(force=True)
+        # 不在这里补做启动检查（启动时不再自动检查更新） 只处理已经发起的检查或下载请求
         self._schedule_update_dialog()
 
     def add_context_download_request(

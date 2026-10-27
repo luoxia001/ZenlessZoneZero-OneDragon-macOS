@@ -1,0 +1,14 @@
+sub_dir: mobile_agent_state
+template_id: ultimate_2_2
+template_name: 终结技-后台1
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 772, 86
+- 815, 96
+# 移动端队友能量条左侧的橙色小条是终结技能量 逐渐变长；颜色约 (230,176,8) 比 PC 暗
+# 只有接近满格（橙色连通块 ≥300 像素 满格约 38×10）才认为终结技可用
+state_override:
+  lower_color: [215, 140, 0]
+  upper_color: [255, 215, 60]
+  connect_cnt: 300

@@ -1,0 +1,7 @@
+# 战斗-菜单 的移动端差异
+# 只写和 PC 不同的区域 其余区域沿用 assets/game_data/screen_info/battle_menu.yml
+screen_id: battle_menu
+area_list:
+# 预备编队列表右下角的「预备出战」也在这个位置 和「退出战斗」有两个字相同 阈值 0.5 时会误判成退出战斗
+- area_name: 按钮-退出战斗
+  lcs_percent: 0.75

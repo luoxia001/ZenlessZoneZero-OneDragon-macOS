@@ -217,6 +217,8 @@ class AutoBattleContext:
         self.area_btn_switch: ScreenArea = self.ctx.screen_loader.get_area('战斗画面', '按键-切换角色')
         self.area_btn_switch_backup_mark: ScreenArea = self.ctx.screen_loader.get_area('战斗画面', '按键-切换后援标记')
         self.area_btn_switch_backup_gray: ScreenArea = self.ctx.screen_loader.get_area('战斗画面', '按键-切换后援灰度区域')
+        # 按颜色判断后援按钮是否可用的区域 画面配置了这个区域时 不再使用上面的标记 + 灰度区域判断
+        self.area_btn_switch_backup_ready_color: ScreenArea | None = self.ctx.screen_loader.get_area('战斗画面', '按键-切换后援-可用颜色')
 
         self.area_chain_1: ScreenArea = self.ctx.screen_loader.get_area('战斗画面', '连携技-1')
         self.area_chain_2: ScreenArea = self.ctx.screen_loader.get_area('战斗画面', '连携技-2')
@@ -634,8 +636,8 @@ class AutoBattleContext:
         """
         并行识别连携技角色
         """
-        c1 = cv2_utils.crop_image_only(screen, self.area_chain_1.rect)
-        c2 = cv2_utils.crop_image_only(screen, self.area_chain_2.rect)
+        c1 = screen_utils.crop_area(screen, self.area_chain_1)
+        c2 = screen_utils.crop_area(screen, self.area_chain_2)
 
         possible_agents = self.agent_context.get_possible_agent_list()
 
@@ -771,7 +773,7 @@ class AutoBattleContext:
                 return
             self._last_check_quick_time = screenshot_time
 
-            part = cv2_utils.crop_image_only(screen, self.area_btn_switch.rect)
+            part = screen_utils.crop_area(screen, self.area_btn_switch)
 
             possible_agents = self.agent_context.get_possible_agent_list()
 
@@ -814,7 +816,16 @@ class AutoBattleContext:
     def _is_switch_backup_ready(self, screen: MatLike) -> bool:
         """
         通过后援按钮标记与灰度区域的颜色特征，判断当前是否可切换后援。
+        画面配置了「按键-切换后援-可用颜色」区域时 改为判断该区域内是否大部分是可用时的颜色
         """
+        color_area = self.area_btn_switch_backup_ready_color
+        if color_area is not None and color_area.color_range:
+            part = cv2_utils.crop_image_only(screen, color_area.rect)
+            if part is None or part.size == 0:
+                return False
+            mask = cv2.inRange(part, color_area.color_range_lower, color_area.color_range_upper)
+            return float(np.mean(mask > 0)) >= 0.5
+
         mark_part = cv2_utils.crop_image_only(screen, self.area_btn_switch_backup_mark.rect)
         gray_part = cv2_utils.crop_image_only(screen, self.area_btn_switch_backup_gray.rect)
 
@@ -1034,9 +1045,15 @@ class AutoBattleContext:
         :return:
         """
         part = cv2_utils.crop_image_only(screen, self.area_btn_normal.rect)
-        mrl = self.ctx.tm.match_template(part, 'battle', 'btn_normal_attack',
-                                         threshold=0.9)
-        return mrl.max is not None
+        # 模板取区域配置（PC 为 battle/btn_normal_attack）画面变体可以换成自己的模板
+        # 区域配置了备选模板时（例如移动端按钮按下的样子）任一模板匹配上都算
+        for template_id in [self.area_btn_normal.template_id] + self.area_btn_normal.alt_template_id_list:
+            mrl = self.ctx.tm.match_template(part, self.area_btn_normal.template_sub_dir,
+                                             template_id,
+                                             threshold=0.9)
+            if mrl.max is not None:
+                return True
+        return False
 
     def start_context_async(self) -> None:
         """

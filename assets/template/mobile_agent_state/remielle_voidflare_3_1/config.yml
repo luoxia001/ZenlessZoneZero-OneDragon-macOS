@@ -1,0 +1,19 @@
+sub_dir: mobile_agent_state
+template_id: remielle_voidflare_3_1
+template_name: 角色状态-蕾米埃尔-虚曜-31
+template_shape: multi_rect
+auto_mask: true
+point_list:
+- 187, 162
+- 192, 166
+- 207, 161
+- 212, 166
+- 225, 162
+- 230, 166
+# 由 PC 坐标换算生成（x' = 1.189x - 1, y' = 1.229y） 还没有逐个实拍校对
+# 实拍校对：点亮的圆点接近纯白（V=255 S≈5~11） 没亮的是深灰（V≈50~65）
+# PC 的颜色范围（H 120~180 V≥55）会把深灰圆点边缘也算进去 读数在 1~5 乱跳 所以只数很亮的像素
+state_override:
+  hsv_color: [90, 30, 245]
+  hsv_color_diff: [90, 30, 15]
+  connect_cnt: 5

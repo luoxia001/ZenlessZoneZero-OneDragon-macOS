@@ -1,0 +1,7 @@
+# 画面-通用 的移动端差异 其余区域沿用 assets/game_data/screen_info/common_screen.yml
+# 移动端的红色返回箭头和大世界的 ME 菜单按钮几乎在同一位置
+# 兜底点击（不识别直接点）只点箭头最上沿那一条：在有返回箭头的画面能点中箭头，在大世界是菜单按钮上方的空白处，不会打开菜单
+screen_id: common_screen
+area_list:
+- area_name: 返回-兜底点击
+  pc_rect: [150, 24, 180, 38]

@@ -1,0 +1,11 @@
+# 恢复电量 的移动端差异 其余区域沿用 assets/game_data/screen_info/restore_charge.yml
+# 移动端弹窗整体偏上 标题「恢复电量」在 y≈330；取消 / 确认 按钮在 y≈840
+# 兑换数量、快捷使用等子态还没在移动端截到
+screen_id: restore_charge
+area_list:
+- area_name: 标题-恢复电量
+  pc_rect: [820, 300, 1100, 365]
+- area_name: 确认
+  pc_rect: [600, 800, 1320, 880]
+- area_name: 取消
+  pc_rect: [600, 800, 1320, 880]

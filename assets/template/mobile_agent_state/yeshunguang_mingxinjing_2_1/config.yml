@@ -1,0 +1,9 @@
+sub_dir: mobile_agent_state
+template_id: yeshunguang_mingxinjing_2_1
+template_name: 叶瞬光-明心境
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 450, 91
+- 670, 92
+# 和能量条同一个位置 叶瞬光进入明心境后能量条变成浅蓝紫色 颜色沿用 PC 的状态定义

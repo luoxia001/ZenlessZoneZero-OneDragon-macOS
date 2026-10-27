@@ -1,0 +1,8 @@
+sub_dir: mobile_battle
+template_id: btn_normal_attack_pressed
+template_name: 普通攻击-按下
+template_shape: circle
+auto_mask: true
+point_list:
+- 1535, 800
+- 1590, 800

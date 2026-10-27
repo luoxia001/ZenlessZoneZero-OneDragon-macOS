@@ -1,0 +1,14 @@
+# 移动端批量替换模板：所有画面里用到左侧模板的区域 一律换成右侧模板和区域范围
+# 适用于大量画面共用、并且在移动端位置统一的按钮
+# 单个画面的特殊差异仍写在 screen_info/ 下对应的变体文件里（变体文件在替换之后合并）
+- template: menu/back
+  replace_template: mobile_menu/back
+  pc_rect: [80, 20, 205, 110]  # 移动端左上角红色返回箭头 比 PC 的宽
+- template: menu/btn_close
+  replace_template: mobile_menu/close  # 移动端弹窗右上角红色 × 区域范围各画面不同 沿用 PC 的
+- template: battle/btn_menu
+  replace_template: mobile_battle/btn_menu
+  pc_rect: [65, 50, 165, 135]  # 移动端战斗左上角暂停按钮 ||
+- template: lost_void/normal_world_tab
+  replace_template: mobile_lost_void/normal_world_tab
+  pc_rect: [65, 425, 215, 565]  # 迷失之地左侧的 LOOT 标签

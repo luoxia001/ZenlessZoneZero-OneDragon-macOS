@@ -62,6 +62,7 @@ class ChoosePredefinedTeam(ZOperation):
         press_wait=0.6, move_duration=0.3, release_wait=1.0,
     )
     MAX_TEAM_COUNT: int = 20
+    MAX_PAGE_RESCAN_TIMES: int = 2  # 头像没识别全时 同一页最多重扫的次数
     # 编队卡片上 100% 不是队名的 UI 文本：槽位标记、右下角标签、头像等级
     TEAM_NAME_UI_TEXT_SET: frozenset[str] = frozenset(
         {'1P', '2P', '3P', 'TEAM', 'AGENT', 'BANGBOO', '60'}
@@ -100,6 +101,8 @@ class ChoosePredefinedTeam(ZOperation):
         self.disabled_team_count: int = 0
         self.unrecognized_team_member_count: int = 0
         self.scan_started: bool = False
+        self.need_rescan_page: bool = False  # 本页有队伍头像没识别全 需要原地重扫
+        self.page_rescan_times: int = 0  # 当前页已经重扫的次数
         self.shiyu_team_selected: bool = shiyu_target_list is None
         self.pending_select_button_center: Point | None = None
         self.pending_cancel_button_center: Point | None = None
@@ -151,6 +154,13 @@ class ChoosePredefinedTeam(ZOperation):
                 self.scan_started = True
 
             scan_finished = self._scan_team_page(self.last_screenshot)
+            if self.need_rescan_page:
+                # 头像没识别全 多半是列表还在滑动或加载 不翻页 等一下重扫本页
+                self.need_rescan_page = False
+                return self.round_wait(
+                    ChoosePredefinedTeam.STATUS_CONTINUE_CHOOSE,
+                    wait=1,
+                )
             if not scan_finished:
                 log.debug(
                     '预备编队扫描继续:当前页:%d 下一页:%d 有效:%d',
@@ -160,6 +170,7 @@ class ChoosePredefinedTeam(ZOperation):
                 )
                 self._scroll_team_list(-1)
                 self.current_scroll_page += 1
+                self.page_rescan_times = 0
                 return self.round_wait(
                     ChoosePredefinedTeam.STATUS_CONTINUE_CHOOSE,
                     wait=1,
@@ -245,6 +256,22 @@ class ChoosePredefinedTeam(ZOperation):
                 team_slot_rect,
             ):
                 return self.round_fail(f'预备编队已禁用，停止选择 {target_team.name}')
+            # 只需要选一支队伍时（例如恶名狩猎） 移动端点 SELECT 后会直接关闭列表 回到出战画面
+            # 这时列表里的选中标记已经看不到了 回到出战画面就算选中 直接结束 不再去点「预备出战」
+            # （出战画面的「出战」按钮也会被当成「预备出战」点下去 跳过调用方自己的出战流程）
+            # 用「预备编队」按钮判断是否回到出战画面 列表右下角的「预备出战」也含「出战」两个字 不能用「出战」
+            if (
+                len(self.target_team_idx_list) == 1
+                and self.round_by_find_area(self.last_screenshot, '实战模拟室', '预备编队').is_success
+            ):
+                log.info(
+                    '预备编队已选:队伍:%s 序号:%d 已回到出战画面',
+                    target_team.name,
+                    target_team_idx + 1,
+                )
+                self.pending_select_button_center = None
+                self.current_target_idx += 1
+                return self.round_success(ChoosePredefinedTeam.STATUS_CHOOSE_FINISHED_WITHOUT_CONFIRM)
             if not self._is_team_selected(ocr_result_map):
                 return self.round_retry(
                     '选择预备编队后未确认选中状态',
@@ -403,6 +430,20 @@ class ChoosePredefinedTeam(ZOperation):
             ):
                 log.debug('预备编队扫描结束:队名:%s 队伍为空', team_name)
                 return True
+
+            if (
+                team_member_count is not None
+                and 0 < len(agent_list) < team_member_count
+                and self.page_rescan_times < self.MAX_PAGE_RESCAN_TIMES
+            ):
+                # 例如 3/3 的队伍只认出 1 个头像 记下去会让配队评分把这支队当成 1 人队
+                self.page_rescan_times += 1
+                self.need_rescan_page = True
+                log.info(
+                    '预备编队头像识别不全:队名:%s 识别 %d / 人数 %d 重扫本页 第%d次',
+                    team_name, len(agent_list), team_member_count, self.page_rescan_times,
+                )
+                return False
 
             self.scanned_team_name_set.add(team_name)
 
@@ -849,20 +890,29 @@ class ChoosePredefinedTeam(ZOperation):
 
     def _scroll_team_list(self, direction: int) -> None:
         """
-        按固定坐标拖动列表。
+        按固定坐标拖动列表。画面配置了「编队列表-翻页拖动」区域时用区域的坐标。
 
         固定坐标避免鼠标停留位置影响翻页；向下扫描和向上回退使用相反方向，
         每次拖动对应 current_scroll_page 的一页变化。
         """
+        drag_start = ChoosePredefinedTeam.TEAM_DRAG_START
+        drag_end = ChoosePredefinedTeam.TEAM_DRAG_END
+        # 画面配置了翻页拖动区域时（卡片大小和 PC 不同 一页的拖动距离不同）从区域底边中点拖到顶边中点
+        drag_area = self.ctx.screen_loader.get_area('编队选择', '编队列表-翻页拖动')
+        if drag_area is not None:
+            center_x = drag_area.rect.center.x
+            drag_start = Point(center_x, drag_area.rect.y2)
+            drag_end = Point(center_x, drag_area.rect.y1)
+
         if direction < 0:
             self.ctx.controller.drag_to(
-                start=ChoosePredefinedTeam.TEAM_DRAG_START,
-                end=ChoosePredefinedTeam.TEAM_DRAG_END,
+                start=drag_start,
+                end=drag_end,
                 timing=ChoosePredefinedTeam.TEAM_DRAG_TIMING,
             )
         else:
             self.ctx.controller.drag_to(
-                start=ChoosePredefinedTeam.TEAM_DRAG_END,
-                end=ChoosePredefinedTeam.TEAM_DRAG_START,
+                start=drag_end,
+                end=drag_start,
                 timing=ChoosePredefinedTeam.TEAM_DRAG_TIMING,
             )

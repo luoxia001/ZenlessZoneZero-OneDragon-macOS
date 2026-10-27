@@ -1,0 +1,8 @@
+sub_dir: mobile_agent_state
+template_id: zhao_3_1
+template_name: 照-霜寒值
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 157, 150
+- 262, 151

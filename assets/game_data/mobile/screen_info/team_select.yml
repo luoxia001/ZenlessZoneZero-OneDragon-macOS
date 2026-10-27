@@ -1,0 +1,25 @@
+# 编队选择（预备编队列表）的移动端差异
+# 只写和 PC 不同的区域 其余区域沿用 assets/game_data/screen_info/team_select.yml
+# 移动端卡片更大 一屏只能完整看到 2 行 4 支队伍（PC 是 3 行 6 支） 行距 360
+# 第 3 行只露出队名和人数 看不到头像 所以槽位 4、5 指向屏幕外的空白处 扫描时会跳过
+screen_id: team_select
+area_list:
+- area_name: 编队槽位0
+  pc_rect: [92, 156, 944, 484]
+- area_name: 编队槽位1
+  pc_rect: [976, 156, 1824, 484]
+- area_name: 编队槽位2
+  pc_rect: [92, 516, 944, 844]
+- area_name: 编队槽位3
+  pc_rect: [976, 516, 1824, 844]
+- area_name: 编队槽位4
+  pc_rect: [0, 1074, 4, 1078]
+- area_name: 编队槽位5
+  pc_rect: [4, 1074, 8, 1078]
+- area_name: 选择标记左
+  pc_rect: [770, 150, 945, 850]
+- area_name: 选择标记右
+  pc_rect: [1650, 150, 1830, 850]
+# 翻一页（2 行 = 4 支队伍）的拖动：从区域底边中点拖到顶边中点 拖动 720 = 2 个行距
+- area_name: 编队列表-翻页拖动
+  pc_rect: [940, 160, 980, 880]

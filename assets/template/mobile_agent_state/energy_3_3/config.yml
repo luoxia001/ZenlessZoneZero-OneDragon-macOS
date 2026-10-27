@@ -1,0 +1,8 @@
+sub_dir: mobile_agent_state
+template_id: energy_3_3
+template_name: 能量-后台2
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 1040, 91
+- 1110, 92

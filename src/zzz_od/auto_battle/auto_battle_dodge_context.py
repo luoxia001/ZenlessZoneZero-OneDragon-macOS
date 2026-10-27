@@ -82,7 +82,13 @@ class AudioRecorder:
         import warnings
 
         import soundcard as sc
-        from soundcard.mediafoundation import SoundcardRuntimeWarning
+        try:
+            # 录制系统声音（回环录音）依赖 Windows 的 Media Foundation 其它平台导入就会失败
+            from soundcard.mediafoundation import SoundcardRuntimeWarning
+        except Exception:
+            log.warning('当前平台不支持录制系统声音 已停止声音闪避识别')
+            self.running = False
+            return
 
         warnings.filterwarnings('ignore', category=SoundcardRuntimeWarning)
 

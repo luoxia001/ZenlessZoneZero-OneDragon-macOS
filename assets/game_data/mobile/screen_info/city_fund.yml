@@ -1,0 +1,14 @@
+# 丽都城募 的移动端差异 其余区域沿用 assets/game_data/screen_info/city_fund.yml
+# 顶部 TAB：等级回馈 / 成长任务 / 城募赠礼（选中的是黄底）；成长任务页右下角是「全部领取」
+# 等级回馈页右下角是付费的「解锁丽都城募」按钮 和 PC 的「开启丽都城募」只差两个字
+# 所以把「开启丽都城募」的文字匹配阈值提高到 0.9 防止误点付费按钮
+screen_id: city_fund
+area_list:
+- area_name: 等级回馈
+  pc_rect: [1040, 30, 1210, 100]
+- area_name: 成长任务
+  pc_rect: [1320, 30, 1500, 100]
+- area_name: 开启丽都城募
+  lcs_percent: 0.9
+- area_name: 任务-全部领取
+  pc_rect: [1500, 980, 1845, 1055]

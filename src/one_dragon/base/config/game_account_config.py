@@ -1,3 +1,4 @@
+import sys
 from enum import Enum
 
 from one_dragon.base.config.config_item import ConfigItem
@@ -7,6 +8,7 @@ from one_dragon.base.config.yaml_config import YamlConfig
 class GamePlatformEnum(Enum):
 
     PC = ConfigItem('PC')
+    PLAYCOVER = ConfigItem('iOS（PlayCover）', 'PlayCover', desc='macOS 上通过 PlayCover 分支版的 MaaTools 控制 iOS 版游戏')
 
 
 class GameLanguageEnum(Enum):
@@ -57,7 +59,9 @@ class GameAccountConfig(YamlConfig):
 
     @property
     def platform(self) -> str:
-        return self.get('platform', GamePlatformEnum.PC.value.value)
+        # macOS 上只能运行 iOS 版 默认使用 PlayCover
+        default = GamePlatformEnum.PLAYCOVER.value.value if sys.platform == 'darwin' else GamePlatformEnum.PC.value.value
+        return self.get('platform', default)
 
     @platform.setter
     def platform(self, new_value: str) -> None:

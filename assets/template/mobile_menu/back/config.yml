@@ -1,0 +1,8 @@
+sub_dir: mobile_menu
+template_id: back
+template_name: 返回
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 90, 30
+- 195, 100

@@ -1,0 +1,24 @@
+# 迷失之地-矩阵行动-编队选择 的移动端差异 其余区域沿用 assets/game_data/screen_info/matrix_action_team_select.yml
+# 左侧：顶部「自由编队 / 预备编队」两个 TAB（选中的是黄底） 下面是代理人 / 预备编队列表
+# 右侧：主战编队 4 个槽位、协战代理人 1 个槽位、协战武备；右下角「开始挑战」
+screen_id: matrix_action_team_select
+area_list:
+- area_name: 预备编队
+  pc_rect: [640, 30, 1000, 100]
+- area_name: 主战编队
+  pc_rect: [1070, 150, 1200, 200]
+- area_name: 协战代理人
+  pc_rect: [1070, 400, 1230, 445]
+- area_name: 编队列表
+  pc_rect: [220, 120, 1010, 1065]
+- area_name: 代理人列表
+  pc_rect: [220, 120, 1010, 1065]
+- area_name: 主战编队槽
+  pc_rect: [1070, 215, 1815, 365]
+- area_name: 协战编队槽
+  pc_rect: [1080, 465, 1235, 615]
+- area_name: 按钮-开始挑战
+  pc_rect: [1525, 985, 1835, 1052]
+# 返回时弹出「是否确认退出主战、协战代理人编队」 移动端 取消 / 确认 左右排列 确认在右边
+- area_name: 确认
+  pc_rect: [980, 610, 1320, 690]

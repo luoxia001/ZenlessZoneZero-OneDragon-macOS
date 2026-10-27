@@ -1,0 +1,15 @@
+# 迷失之地-武备选择 的移动端差异 其余区域沿用 assets/game_data/screen_info/lost_void_gear.yml
+# 左上「详情」开关；中间面板显示选中武备的名称（首行）和说明；右侧「携带」；底部一排武备图标 部分下方有「100」价格
+screen_id: lost_void_gear
+area_list:
+- area_name: 文本-详情
+  pc_rect: [230, 35, 315, 95]
+- area_name: 按钮-携带
+  pc_rect: [1690, 790, 1910, 858]
+- area_name: 武备列表
+  pc_rect: [130, 875, 1800, 1075]
+- area_name: 武备名称
+  pc_rect: [380, 440, 1550, 500]
+# 携带后的确认弹窗：取消 / 确认 左右排列 确认在右边
+- area_name: 确认
+  pc_rect: [980, 670, 1330, 755]

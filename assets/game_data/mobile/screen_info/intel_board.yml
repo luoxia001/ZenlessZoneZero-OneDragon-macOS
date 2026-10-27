@@ -1,0 +1,17 @@
+# 情报板 的移动端差异 其余区域沿用 assets/game_data/screen_info/intel_board.yml
+# 底部一排从左到右：刷新、筛选（蓝色漏斗）、点数兑换、委托管理、发布委托
+# 筛选面板在右侧弹出 底部是「重置」 右上角红色 × 关闭；移动端点重置只清空选择 不会关闭面板
+screen_id: intel_board
+area_list:
+- area_name: 刷新按钮
+  pc_rect: [705, 975, 795, 1060]
+  template_sub_dir: mobile_intel_board
+  template_id: refresh
+- area_name: 筛选按钮
+  pc_rect: [815, 985, 880, 1050]
+- area_name: 重置按钮
+  pc_rect: [1300, 985, 1650, 1052]
+- area_name: 关闭筛选
+  pc_rect: [1740, 35, 1820, 90]
+- area_name: 进度文本
+  pc_rect: [250, 1020, 550, 1060]

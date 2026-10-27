@@ -112,6 +112,10 @@
 
 保存时会裁剪其它类型的字段。切换类型后，界面内存可以暂时保留旧字段，最终 YAML 只保留当前类型的数据。
 
+## 画面变体
+
+`ScreenContext` 可以设置画面变体（例如移动端 `mobile`）。设置后，会在上面的画面配置之上叠加 `assets/game_data/{变体}/screen_info/` 里的同名画面，按 `area_name` 覆盖区域字段。被变体覆盖的画面保存时写到变体目录，不改动基础画面文件。合并规则和用途见 [macOS（iOS 版 + PlayCover）支持设计文档](../macos_playcover_design.md)。
+
 ## 匹配行为
 
 - `find_area_in_screen`、`find_area_in_screen_binary` 和 `find_area_with_detail` 只处理具备完整匹配条件的 `text`、`template`。

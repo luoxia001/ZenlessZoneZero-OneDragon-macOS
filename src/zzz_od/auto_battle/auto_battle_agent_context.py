@@ -7,8 +7,9 @@ from typing import Optional, List, Union, Tuple, Callable, TYPE_CHECKING
 from cv2.typing import MatLike
 
 from one_dragon.base.conditional_operation.state_recorder import StateRecord, StateRecorder
+from one_dragon.base.screen import screen_utils
 from one_dragon.base.screen.screen_area import ScreenArea
-from one_dragon.utils import cv2_utils, cal_utils
+from one_dragon.utils import cal_utils
 from one_dragon.utils.log_utils import log
 from zzz_od.auto_battle.agent_state import agent_state_checker
 from zzz_od.auto_battle.auto_battle_state import BattleStateEnum
@@ -415,13 +416,13 @@ class AutoBattleAgentContext:
         并发识别角色
         :return:
         """
-        area_rect = [
-            self.area_agent_3_1.rect,
-            self.area_agent_3_2.rect,
-            self.area_agent_3_3.rect,
-            self.area_agent_2_2.rect
+        area_list = [
+            self.area_agent_3_1,
+            self.area_agent_3_2,
+            self.area_agent_3_3,
+            self.area_agent_2_2,
         ]
-        area_img = [cv2_utils.crop_image_only(screen, rect) for rect in area_rect]
+        area_img = [screen_utils.crop_area(screen, area) for area in area_list]
 
         possible_agents = self.get_possible_agent_list()
 

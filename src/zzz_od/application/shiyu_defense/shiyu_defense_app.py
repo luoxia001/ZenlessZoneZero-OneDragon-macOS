@@ -88,6 +88,15 @@ class ShiyuDefenseApp(ZApplication):
     @node_from(from_name='等待画面加载')
     @operation_node(name='选择节点')
     def choose_node_idx(self) -> OperationRoundResult:
+        # 已经点过节点 并进入了节点详情（出现「下一步」）时 沿用刚才点击的节点
+        # 详情页上没有剧变节点进度 如果继续往下走会按运行记录重新推算节点
+        # 运行记录和游戏不一致时（例如上次中途退出）会推算成别的节点 一直去找画面上没有的节点按钮
+        if self.current_node_idx > 0:
+            result = self.round_by_find_area(self.last_screenshot, '式舆防卫战', '下一步')
+            if result.is_success:
+                log.info('当前节点 %d', self.current_node_idx)
+                return self.round_success(result.status, wait=1)
+
         # OCR 读取剧变节点进度 X/Y，确定下一个要挑战的节点
         area = self.ctx.screen_loader.get_area('式舆防卫战', '剧变节点进度')
         ocr_results = self.ctx.ocr.crop_and_run_ocr(self.last_screenshot, area.rect)
@@ -390,8 +399,10 @@ class ShiyuDefenseApp(ZApplication):
                 return self.round_wait(result.status, wait=1)
 
             # 没有下一防线，说明前四关打完了，退出后进第五关
-            self.round_by_find_and_click_area(self.last_screenshot, '式舆防卫战', '战斗结束-退出',
-                                              success_wait=10)
+            result = self.round_by_find_and_click_area(self.last_screenshot, '式舆防卫战', '战斗结束-退出')
+            if result.is_success:
+                # 退出后回到选关画面 下一轮用新的截图找节点-05（这一轮的截图还是结算画面）
+                return self.round_wait(result.status, wait=5)
 
             result2 = self.round_by_find_and_click_area(self.last_screenshot, '式舆防卫战', '节点-05')
             if result2.is_success:

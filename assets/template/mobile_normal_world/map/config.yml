@@ -1,0 +1,8 @@
+sub_dir: mobile_normal_world
+template_id: map
+template_name: 地图
+template_shape: circle
+auto_mask: true
+point_list:
+- 1680, 358
+- 1720, 358

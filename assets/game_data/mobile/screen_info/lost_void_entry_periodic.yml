@@ -1,0 +1,12 @@
+# 迷失之地-入口-周期 的移动端差异 其余区域沿用 assets/game_data/screen_info/lost_void_entry_periodic.yml
+# 顶部 TAB：悬赏委托 / 周期 / 常规；选中的是黄底白字 没选中的是暗底灰字（最亮约 107）
+# 所以选中判断用白色文字过滤：只有选中的 TAB 文字是白色
+screen_id: lost_void_entry_periodic
+area_list:
+- area_name: 按钮-周期
+  pc_rect: [1360, 35, 1460, 88]
+  color_range: [[230, 230, 230], [255, 255, 255]]
+- area_name: 按钮-常规
+  pc_rect: [1585, 35, 1680, 88]
+- area_name: 探索收集
+  pc_rect: [1600, 985, 1780, 1050]

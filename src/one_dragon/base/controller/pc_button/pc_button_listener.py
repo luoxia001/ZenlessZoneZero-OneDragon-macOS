@@ -1,9 +1,62 @@
+import contextlib
+import sys
+import threading
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from pynput import keyboard, mouse
 
 from one_dragon.utils import thread_utils
+from one_dragon.utils.log_utils import log
+
+_darwin_keycode_context_ready: bool = False
+
+
+def _prepare_darwin_keycode_context() -> None:
+    """
+    macOS 下提前在主线程读取键盘布局 给 pynput 的键盘监听线程使用
+
+    pynput 的键盘监听线程启动时会读取当前输入法的键盘布局。
+    新版 macOS 要求这个接口只能在主线程调用 在其他线程调用会直接崩溃（SIGTRAP）。
+    所以在主线程读取一次 再让监听线程直接使用读到的结果。
+    """
+    global _darwin_keycode_context_ready
+    if _darwin_keycode_context_ready:
+        return
+
+    from pynput._util import darwin as pynput_darwin
+    from pynput.keyboard import _darwin as pynput_keyboard_darwin
+
+    result: dict[str, tuple] = {}
+    done = threading.Event()
+
+    def read_context() -> None:
+        try:
+            with pynput_darwin.keycode_context() as context:
+                result['context'] = context
+        finally:
+            done.set()
+
+    if threading.current_thread() is threading.main_thread():
+        read_context()
+    else:
+        # GUI 里初始化在后台线程 主线程在跑 Qt 事件循环 可以把读取交给主线程
+        from PyObjCTools import AppHelper
+        AppHelper.callAfter(read_context)
+        if not done.wait(timeout=5):
+            log.warning('主线程没有及时读取键盘布局 不启动键盘监听')
+            return
+
+    if 'context' not in result:
+        return
+    cached_context = result['context']
+
+    @contextlib.contextmanager
+    def cached_keycode_context():
+        yield cached_context
+
+    pynput_keyboard_darwin.keycode_context = cached_keycode_context
+    _darwin_keycode_context_ready = True
 
 
 class PcButtonListener:
@@ -72,6 +125,17 @@ class PcButtonListener:
             future.add_done_callback(thread_utils.handle_future_result)
 
     def start(self):
+        if sys.platform == 'darwin':
+            # pynput 的键盘和鼠标监听线程会同时读取 PyObjC 懒加载的 AXIsProcessTrusted
+            # 两个线程并发解析同一个符号时 PyObjC 会抛 KeyError 导致监听线程退出
+            # 先在主线程解析一次 后面线程直接用缓存
+            import HIServices
+            _ = HIServices.AXIsProcessTrusted
+        if self.listen_keyboard:
+            if sys.platform == 'darwin':
+                _prepare_darwin_keycode_context()
+                if not _darwin_keycode_context_ready:
+                    self.listen_keyboard = False
         if self.listen_keyboard:
             self.keyboard_listener.start()
         if self.listen_mouse:

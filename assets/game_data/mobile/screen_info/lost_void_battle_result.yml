@@ -1,0 +1,7 @@
+# 迷失之地-挑战结果 的移动端差异 其余区域沿用 assets/game_data/screen_info/lost_void_battle_result.yml
+# 「挑战结果」用 0.5 的文字匹配阈值时 移动端情报板卡片上的「专业挑战室」（含「挑战」两个字）会被误判成这个画面
+# 提高到 0.75：至少要对上 3 个字
+screen_id: lost_void_battle_result
+area_list:
+- area_name: 标题-挑战结果
+  lcs_percent: 0.75

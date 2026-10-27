@@ -1,0 +1,25 @@
+# 菜单 的移动端差异 其余区域沿用 assets/game_data/screen_info/menu.yml
+# 移动端菜单底部是一排图标加文字（更多、勘域编队、邮件、设置……调频），比 PC 多出最左侧的「更多」
+# 移动端没有 PC 的动态壁纸按钮；左上角红色返回箭头由 template_replace.yml 统一替换
+# 返回按钮在很多画面都有 所以再用底部的「更多」「邮件」文字一起识别菜单
+screen_id: menu
+area_list:
+- area_name: 菜单-动态壁纸
+  id_mark: false
+- area_name: 底部列表
+  pc_rect: [60, 1005, 1860, 1062]
+- area_name: 底部-仓库
+  pc_rect: [60, 1005, 1860, 1062]
+- area_name: 底部-邮件
+  id_mark: true
+  pc_rect: [60, 1005, 1860, 1062]
+- area_name: 底部-更多
+  id_mark: true
+  pc_rect: [60, 1005, 1860, 1062]
+- area_name: 底部-绳网
+  pc_rect: [60, 1005, 1860, 1062]
+# 兑换码弹窗：输入框在中间 兑换按钮比 PC 靠下
+- area_name: 兑换码输入框
+  pc_rect: [620, 530, 1220, 612]
+- area_name: 兑换码兑换
+  pc_rect: [800, 738, 1125, 808]

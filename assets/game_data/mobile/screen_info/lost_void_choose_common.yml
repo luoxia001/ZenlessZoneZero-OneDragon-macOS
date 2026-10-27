@@ -1,0 +1,8 @@
+# 迷失之地-通用选择 的移动端差异 其余区域沿用 assets/game_data/screen_info/lost_void_choose_common.yml
+# 标题（如「请选择1枚鸣徽」）在画面顶部正中 位置不固定：三张卡片时 y≈75 比 PC 靠上；
+# 两张卡片且顶部有「刷新」时（如武备二选一）y≈125-165 区域要同时盖住这两种位置
+# 标题识别不到时 流程不知道要选几个 会直接点灰色的确定 一直循环
+screen_id: lost_void_choose_common
+area_list:
+- area_name: 区域-标题
+  pc_rect: [760, 40, 1160, 180]

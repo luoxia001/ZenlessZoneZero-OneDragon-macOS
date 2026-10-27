@@ -1,0 +1,75 @@
+# 战斗画面 的移动端差异 其余区域沿用 assets/game_data/screen_info/battle.yml
+# 移动端战斗 HUD：左下虚拟摇杆；右下 普通攻击（拳头 中心约 1535,800）、特殊攻击（左下 1377,893）、
+# 闪避（右下 1693,893）、切换角色（黄色 1693,709）、终结技（1693,523）；左上角 || 是暂停菜单
+# 大世界里同一位置的按钮是交互（箭头图标）
+# 按键位置同时写在 assets/game_data/mobile/touch_layout.yml（触控用）
+screen_id: battle
+area_list:
+- area_name: 按键-普通攻击
+  pc_rect: [1465, 730, 1605, 870]
+  template_sub_dir: mobile_battle
+  template_id: btn_normal_attack
+  # 按住普攻（或连点）时按钮会变成白底黑拳 主模板匹配不上 用备选模板兜住 否则会被当成「不在战斗画面」
+  alt_template_id_list: [btn_normal_attack_pressed]
+# 交互按键出现时有约 0.6 秒的淡入动画 半透明时模板匹配度只有 0.70-0.80（完全显示后 0.9 以上）
+# 用 PC 的 0.7 阈值会漏掉刚出现的几帧 寻路刚好截到这几帧就判断不到已到达 会重新起步跑过入口
+# 不出现交互按键的画面（含邦布的暗色不可用按键）最高只有 0.37
+- area_name: 按键-交互
+  pc_rect: [1465, 730, 1605, 870]
+  template_sub_dir: mobile_battle
+  template_id: btn_interact
+  template_match_threshold: 0.6
+- area_name: 按键-特殊攻击
+  pc_rect: [1310, 825, 1445, 960]
+- area_name: 按键-终结技
+  pc_rect: [1625, 455, 1760, 590]
+# 快速支援时切换按钮会变成支援角色的头像 画法和 PC 一样 大约是 PC 的 1.5 倍
+# 识别时按 template_scale 缩小后复用 PC 的快速支援头像模板（battle/avatar_quick_*）
+- area_name: 按键-切换角色
+  pc_rect: [1625, 640, 1760, 775]
+  template_scale: 0.65
+# 切换后援（矩阵行动的协战代理人 3+1 编队里的 +1）：切换角色按钮左边的辐射图标按钮 中心约 1375,705
+# 冷却中是灰色 可用时变成紫色 没有 PC 那样的黑色标记 所以改用扇叶上一小块的颜色判断
+- area_name: 按键-切换后援-可用颜色
+  pc_rect: [1336, 700, 1346, 710]
+  color_range: [[100, 60, 180], [200, 170, 255]]
+# 连携技：底部 CHAIN ATTACK 倒计时条两端的圆形头像 圆心约 358,878 和 1562,878 直径约 170
+# 画法和 PC 一样 约 1.43 倍 按 template_scale 缩小后复用 PC 的连携技头像模板（battle/avatar_chain_*）
+- area_name: 连携技-1
+  pc_rect: [274, 794, 443, 963]
+  template_scale: 0.7
+- area_name: 连携技-2
+  pc_rect: [1478, 794, 1647, 963]
+  template_scale: 0.7
+# 式舆防卫战 Boss 出场后右上角多一条 Boss 血条 倒计时被挤到下面一行（数字 y 192~220 比平时低约 95）
+# 普通倒计时区域沿用 PC（实测在移动端也稳定数出 4 个轮廓） 精英区域按普通区域下移 95 实测 270 帧全部是 4 个轮廓
+- area_name: 式舆防卫战-倒计时-精英
+  pc_rect: [1628, 174, 1670, 202]
+# 式舆防卫战倒计时的完整时间数字 轮廓判断不稳时用 OCR 读时间（只有移动端配置 PC 没有这两个区域）
+# 普通位置数字在 y 97~124 Boss 出场后下移到 y 192~220
+- area_name: 式舆防卫战-倒计时文字
+  pc_rect: [1580, 90, 1765, 130]
+- area_name: 式舆防卫战-倒计时文字-精英
+  pc_rect: [1580, 185, 1765, 225]
+# 式舆防卫战 Boss 血条（右上角最上面一行 上下各有一条黑色长边框） Boss 机制阶段倒计时会被提示替换 靠它判断战斗还没结束
+- area_name: 式舆防卫战-Boss血条
+  pc_rect: [1280, 56, 1680, 105]
+- area_name: 菜单
+  pc_rect: [80, 55, 150, 125]
+# 头像：移动端前台头像在左上角 两个队友头像在血条右边；头像画法和 PC 一样 只是大约 1.2 倍
+# 所以裁剪后按 template_scale 缩小到 PC 尺寸 直接复用 PC 的头像模板（battle/avatar_*）
+- area_name: 头像-3-1
+  pc_rect: [130, 50, 320, 130]
+  template_scale: 0.83
+- area_name: 头像-3-2
+  pc_rect: [670, 55, 790, 105]
+  template_scale: 0.83
+- area_name: 头像-3-3
+  pc_rect: [890, 55, 1010, 105]
+  template_scale: 0.83
+- area_name: 头像-2-2  # 两人队伍时的队友 位置待实拍确认 先和三人队的第一个队友相同
+  pc_rect: [670, 55, 790, 105]
+  template_scale: 0.83
+# 战斗结算底部按钮：移动端「再来一次」在 x 1166-1307 PC 区域从 1232 开始 只能读到「次」
+- area_name: 战斗结果-再来一次
+  pc_rect: [1150, 990, 1330, 1045]

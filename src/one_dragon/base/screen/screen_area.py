@@ -32,6 +32,8 @@ class ScreenArea:
         goto_list: list[str] | None = None,
         color_range: list[list[int]] | None = None,
         gamepad_key: str | None = None,
+        template_scale: float = 1.0,
+        alt_template_id_list: list[str] | None = None,
     ) -> None:
         self.area_name: str = area_name or ''
         self.pc_rect: Rect = pc_rect if pc_rect is not None else Rect(0, 0, 0, 0)
@@ -45,6 +47,12 @@ class ScreenArea:
         self.goto_list: list[str] = [] if goto_list is None else goto_list  # 交互后可能会跳转的画面名称列表
         self.color_range: list[list[int]] | None = color_range  # OCR识别前的颜色过滤范围
         self.gamepad_key: str | None = gamepad_key  # GamepadActionEnum 动作名 如 'menu', 'compendium'
+        # 裁剪出区域图片后 先按这个比例缩放再和模板匹配
+        # 用于画面变体（如移动端）里同一个图标比 PC 大或小 但想复用 PC 模板的情况
+        self.template_scale: float = 1.0 if template_scale is None else template_scale
+        # 备选模板（和 template_id 同一个子目录） 主模板匹配不上时依次尝试
+        # 用于同一个按钮有多种样子的情况 例如移动端普通攻击按钮按下时会变成白底黑拳
+        self.alt_template_id_list: list[str] = [] if alt_template_id_list is None else list(alt_template_id_list)
         self._area_type: ScreenAreaType = self._init_area_type(area_type)
 
     def _init_area_type(self, area_type: ScreenAreaType | str | None) -> ScreenAreaType:
@@ -171,5 +179,9 @@ class ScreenArea:
             order_dict['goto_list'] = self.goto_list
         if self.gamepad_key:
             order_dict['gamepad_key'] = self.gamepad_key
+        if self.template_scale != 1.0:
+            order_dict['template_scale'] = self.template_scale
+        if self.alt_template_id_list:
+            order_dict['alt_template_id_list'] = self.alt_template_id_list
 
         return order_dict

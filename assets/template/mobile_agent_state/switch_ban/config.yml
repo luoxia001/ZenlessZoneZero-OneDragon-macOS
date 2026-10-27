@@ -1,0 +1,8 @@
+sub_dir: mobile_agent_state
+template_id: switch_ban
+template_name: 切人按钮
+template_shape: circle
+auto_mask: true
+point_list:
+- 1693, 709
+- 1723, 709

@@ -1,0 +1,23 @@
+sub_dir: mobile_agent_state
+template_id: yeshunguang_qingming_2_1
+template_name: 叶瞬光-青溟剑势-红
+template_shape: multi_rect
+auto_mask: true
+point_list:
+- 156, 156
+- 160, 160
+- 175, 156
+- 179, 160
+- 195, 156
+- 199, 160
+- 214, 156
+- 218, 160
+- 233, 156
+- 237, 160
+- 252, 156
+- 256, 160
+# 常态下胶囊里 6 个小菱形 只看每个菱形中心 5×5：点亮的整块填满（V=255） 未点亮的中心是暗的（V≈65 只有描边亮）
+state_override:
+  hsv_color: [90, 128, 248]
+  hsv_color_diff: [90, 128, 8]
+  connect_cnt: 6

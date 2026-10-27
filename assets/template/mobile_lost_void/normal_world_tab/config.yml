@@ -1,0 +1,8 @@
+sub_dir: mobile_lost_void
+template_id: normal_world_tab
+template_name: 迷失之地-TAB
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 78, 440
+- 200, 550

@@ -1,0 +1,9 @@
+sub_dir: mobile_agent_state
+template_id: lucia_3_1
+template_name: 角色状态-卢西娅-31
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 160, 151
+- 264, 152
+# 由 PC 坐标换算生成（x' = 1.189x - 1, y' = 1.229y） 还没有逐个实拍校对

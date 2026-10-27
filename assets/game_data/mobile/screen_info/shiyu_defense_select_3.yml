@@ -1,0 +1,10 @@
+# 式舆防卫战-三间选择 的移动端差异 其余区域沿用 assets/game_data/screen_info/shiyu_defense_select_3.yml
+# 「总分」只有两个字 0.5 的阈值只要对上一个字 移动端情报板卡片左上角的「10时 00分」会被误判成这个画面
+# 提高到 1.0：两个字都要对上
+screen_id: shiyu_defense_select_3
+area_list:
+- area_name: 本期最佳总分
+  lcs_percent: 1.0
+# 点「重置全部」后弹出的确认框：「确认」按钮在 1136,651~1209,694 PC 的区域偏上 只裁到文字上半截 OCR 读不出
+- area_name: 确认
+  pc_rect: [1080, 640, 1270, 705]

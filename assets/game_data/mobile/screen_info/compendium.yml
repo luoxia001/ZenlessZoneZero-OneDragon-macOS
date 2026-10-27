@@ -1,0 +1,19 @@
+# 快捷手册 的移动端差异 其余区域沿用 assets/game_data/screen_info/compendium.yml
+# 日常 TAB：今日最大活跃度在左上 右侧进度条 100/200/300/400 四个节点 领取后变成绿色对勾
+# 活跃度全部领取后 点「今日最大活跃度」会弹出「奖励预览」 标题在弹窗左上
+screen_id: compendium
+area_list:
+- area_name: 今日最大活跃度
+  pc_rect: [380, 235, 640, 335]
+- area_name: 活跃度奖励-4
+  pc_rect: [1564, 240, 1652, 328]
+  template_sub_dir: mobile_compendium
+  template_id: completed
+- area_name: 活跃度奖励-奖励预览
+  pc_rect: [350, 165, 560, 230]
+# 副本列表：左侧分类（周期征讨、式舆防卫战……） 中间每个副本一张卡片 卡片右下角是「前往」
+# 卡片比 PC 靠下 第二张卡片的「前往」在 y≈895 超出了 PC 的前往列表范围
+- area_name: 分类列表
+  pc_rect: [110, 300, 410, 965]
+- area_name: 前往列表
+  pc_rect: [1312, 334, 1700, 945]

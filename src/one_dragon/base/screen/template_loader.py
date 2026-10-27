@@ -2,7 +2,11 @@ import os
 from cv2.typing import MatLike
 from typing import List, Optional
 
-from one_dragon.base.screen.template_info import TemplateInfo, is_template_existed
+from one_dragon.base.screen.template_info import (
+    TemplateInfo,
+    get_template_sub_dir_path,
+    is_template_existed,
+)
 from one_dragon.utils import os_utils
 
 
@@ -10,6 +14,22 @@ class TemplateLoader:
 
     def __init__(self):
         self.template: dict[str, TemplateInfo] = {}
+        # 模板变体 例如 'mobile' 设置后优先使用 assets/template/{变体}_{子文件夹}/{模板id}
+        # 变体里没有的模板 仍然使用原来的模板
+        self.template_variant: str | None = None
+
+    def set_template_variant(self, variant: str | None) -> None:
+        """
+        设置模板变体 变化时清空已加载的模板
+
+        Args:
+            variant: 变体名称 例如 'mobile' 为空时只使用原来的模板
+        """
+        variant = variant or None
+        if variant == self.template_variant:
+            return
+        self.template_variant = variant
+        self.template.clear()
 
     def get_all_template_info_from_disk(self, need_raw: bool = True, need_config: bool = False) -> List[TemplateInfo]:
         """
@@ -50,11 +70,20 @@ class TemplateLoader:
         :param only_mask:
         :return: 模板图片
         """
+        key = '%s:%s' % (sub_dir, template_id)
+        if self.template_variant:
+            variant_sub_dir = f'{self.template_variant}_{sub_dir}'
+            if is_template_existed(variant_sub_dir, template_id, need_raw=False):
+                sub_dir = variant_sub_dir
+            elif os.path.exists(os.path.join(get_template_sub_dir_path(variant_sub_dir), '_variant_only')):
+                # 变体目录里放了 _variant_only 标记文件：变体里没有的模板不再回退到原模板
+                # 用于位置和 PC 完全不同的模板（如角色状态） 读错位置比不读更糟
+                return None
+
         if not is_template_existed(sub_dir, template_id, need_raw=False):
             return None
         template: TemplateInfo = TemplateInfo(sub_dir, template_id)
 
-        key = '%s:%s' % (sub_dir, template_id)
         self.template[key] = template
         return template
 

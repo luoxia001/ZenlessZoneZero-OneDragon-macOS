@@ -1,4 +1,7 @@
-import winreg
+import sys
+
+if sys.platform == 'win32':  # 注册表只在 Windows 上存在 其它平台导入本模块时跳过
+    import winreg
 
 from one_dragon.base.operation.operation import Operation
 from one_dragon.base.operation.operation_node import operation_node

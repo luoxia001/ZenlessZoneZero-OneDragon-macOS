@@ -5,8 +5,6 @@ from functools import lru_cache
 from typing import Optional
 
 import cv2
-import win32clipboard
-import win32con
 from cv2.typing import MatLike
 from PIL import Image
 
@@ -33,8 +31,12 @@ def get_debug_image(filename, suffix: str = '.png') -> MatLike:
 
 
 def copy_image_to_clipboard(image) -> bool:
-    """将图片复制到剪贴板"""
+    """将图片复制到剪贴板 仅支持 Windows"""
     try:
+        # 延迟导入 避免非 Windows 平台在导入本模块时失败
+        import win32clipboard
+        import win32con
+
         pil_image = Image.fromarray(image)
         with io.BytesIO() as output:
             pil_image.save(output, "BMP")

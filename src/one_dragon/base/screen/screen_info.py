@@ -45,6 +45,8 @@ class ScreenInfo:
                 id_mark=data_area.get('id_mark', False),
                 goto_list=data_area.get('goto_list', []),
                 gamepad_key=data_area.get('gamepad_key', None),
+                template_scale=data_area.get('template_scale', 1.0),
+                alt_template_id_list=data_area.get('alt_template_id_list'),
             )
             self.area_list.append(area)
 

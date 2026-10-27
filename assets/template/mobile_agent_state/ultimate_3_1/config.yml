@@ -1,0 +1,19 @@
+sub_dir: mobile_agent_state
+template_id: ultimate_3_1
+template_name: 终结技按钮
+template_shape: circle
+auto_mask: true
+point_list:
+- 1693, 523
+- 1743, 523
+# 移动端按钮可用时整块变成彩色（特殊技粉紫、终结技蓝） 不可用时是灰色 但中间的星形图标在灰色时也很亮
+# 所以不按 PC 的「白色高亮」判断 改为统计高饱和度的像素：色相不限 饱和度 ≥100 亮度 ≥80
+state_override:
+  hsv_color: [90, 177, 167]
+  hsv_color_diff: [90, 78, 88]
+# 按钮正被按着时会变成白底黑图标（实测白色像素占比约 0.5 平时接近 0） 这时看不出技能是否可用
+# 读成「不可用」会让依赖它的规则误判 例如 柳 刚按下特殊技就被「不可用」打断 所以返回读不出来 不更新状态
+unknown_when:
+  hsv_color: [90, 30, 230]
+  hsv_color_diff: [90, 30, 30]
+  ratio: 0.35

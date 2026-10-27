@@ -1,0 +1,8 @@
+# 实战模拟室 的移动端差异（式舆防卫战等出战前的编队画面也用这里的按钮）
+# 只写和 PC 不同的区域 其余区域沿用 assets/game_data/screen_info/combat_simulation.yml
+# 底部按钮从左到右：战斗设置、预备编队、关卡详情、出战
+screen_id: combat_simulation
+area_list:
+- area_name: 预备编队
+  pc_rect: [480, 985, 690, 1050]
+  text: 预备编队

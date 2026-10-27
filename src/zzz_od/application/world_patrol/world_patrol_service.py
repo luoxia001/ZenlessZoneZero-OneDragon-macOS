@@ -44,6 +44,10 @@ class WorldPatrolService:
     # 小地图坐标 = "地图"坐标 - DELTA
     MINI_MAP_DELTA = (169, 151)
 
+    # MiniMapWrapper 的识别参数按 PC 小地图 210x210 设计
+    # 画面变体（如移动端）的小地图更大时 裁剪后缩放到这个尺寸再识别
+    MINI_MAP_SIZE = 210
+
     def __init__(self, ctx: ZContext):
         self.ctx: ZContext = ctx
 
@@ -77,7 +81,7 @@ class WorldPatrolService:
         current_screen_name = self.ctx.screen_loader.current_screen_name
         mini_map_screen_name = current_screen_name if current_screen_name in ['大世界-普通', '大世界-勘域'] else None
         if mini_map_screen_name is not None and self._mini_map_rect is not None and self._mini_map_screen_name == mini_map_screen_name:
-            rgb = cv2_utils.crop_image_only(screen, self._mini_map_rect)
+            rgb = self._fit_mini_map_size(cv2_utils.crop_image_only(screen, self._mini_map_rect))
             return MiniMapWrapper(rgb), self._mini_map_rect
 
         # 获取小地图静态配置，用于动态框尺寸和兜底裁剪。
@@ -102,7 +106,7 @@ class WorldPatrolService:
             )
 
             # 使用计算出的区域裁剪，确认确实是小地图后才缓存；静态兜底不缓存
-            rgb = cv2_utils.crop_image_only(screen, mini_map_rect)
+            rgb = self._fit_mini_map_size(cv2_utils.crop_image_only(screen, mini_map_rect))
             mini_map = MiniMapWrapper(rgb)
             if mini_map.play_mask_found and mini_map_screen_name is not None:
                 self._mini_map_rect = mini_map_rect
@@ -112,8 +116,23 @@ class WorldPatrolService:
             return mini_map, mini_map_rect
         else:
             # 模板匹配失败，降级使用固定区域（不缓存）
-            rgb = cv2_utils.crop_image_only(screen, default_area.rect)
+            rgb = self._fit_mini_map_size(cv2_utils.crop_image_only(screen, default_area.rect))
             return MiniMapWrapper(rgb), None
+
+    def _fit_mini_map_size(self, rgb: MatLike) -> MatLike:
+        """
+        小地图裁剪结果不是 MINI_MAP_SIZE 时缩放过去 PC 的裁剪本来就是这个尺寸 不受影响
+
+        Args:
+            rgb: 裁剪出的小地图
+
+        Returns:
+            MINI_MAP_SIZE 大小的小地图
+        """
+        size = WorldPatrolService.MINI_MAP_SIZE
+        if rgb.shape[0] == size and rgb.shape[1] == size:
+            return rgb
+        return cv2.resize(rgb, (size, size), interpolation=cv2.INTER_AREA)
 
     def load_data(self):
         self.load_area()

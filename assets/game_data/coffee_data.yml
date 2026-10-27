@@ -1,6 +1,7 @@
 coffee_list:
   - coffee_name: "新艾利都特调"
   - coffee_name: "汀曼特调"
+  - coffee_name: "鲜萃红茶"  # 布亚斯特城区-片刻闲 菜单里的第二种饮料
   - coffee_name: "沙罗特调"
     extra: true
   - coffee_name: "沙罗特调（淡）"

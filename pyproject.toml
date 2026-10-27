@@ -11,7 +11,10 @@ dependencies = [
     "opencv-python==4.13.0.92",
     "pyautogui==0.9.54",
     "pynput==1.8.1",
-    "onnxruntime-directml==1.24.4",
+    "onnxruntime-directml==1.24.4; sys_platform == 'win32'",
+    # macOS 用 1.23.2：1.24.x 在 macOS arm64 上每跑一次 OCR 文字检测模型就有约 20~50MB 内存不释放 长时间运行会内存不足
+    "onnxruntime==1.23.2; sys_platform == 'darwin'",
+    "pyobjc-framework-Quartz>=12.1; sys_platform == 'darwin'",
     "shapely==2.1.2",
     "pyclipper==1.4.0",
     "soundcard==0.4.6",
@@ -21,7 +24,7 @@ dependencies = [
     "psutil==7.2.2",
     # pywin32>=312 的 wheel 不再内置 mfc140u.dll，未装 VC++ 2015-2022 Redistributable (x64) 的机器
     # import win32ui 会闪退（issue #2428）；锁 <312 沿用 311（自带 pythonwin/mfc140u.dll）。等上游 build 313 修复后放开。
-    "pywin32<312",
+    "pywin32<312; sys_platform == 'win32'",
 ]
 
 [dependency-groups]
@@ -34,21 +37,27 @@ dev = [
     "pytest>=8.4.1",
     "pytest-asyncio>=1.4.0",
     "ruff>=0.15.18",
-    "pyuac==0.0.3",
+    "pyuac==0.0.3; sys_platform == 'win32'",
     "mcp>=2.0.0,<3",
     "uvicorn>=0.30.0",
     "pyright>=1.1.411",
 ]
 
 gamepad = [
-    "vgamepad==0.1.0",
+    "vgamepad==0.1.0; sys_platform == 'win32'",
 ]
 
 [tool.uv]
 package = false
 cache-dir = "./.install/uv_cache"
-environments = ["sys_platform == 'win32'"]
+environments = ["sys_platform == 'win32'", "sys_platform == 'darwin' and platform_machine == 'arm64'"]
 default-groups = []
+
+# vgamepad 只发布了 sdist，在 macOS 上构建元数据会直接报错；这里给出静态元数据，跳过构建
+[[tool.uv.dependency-metadata]]
+name = "vgamepad"
+version = "0.1.0"
+requires-dist = []
 
 # Ruff configuration
 [tool.ruff]

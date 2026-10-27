@@ -1,0 +1,12 @@
+# 迷失之地-入口 的移动端差异 其余区域沿用 assets/game_data/screen_info/lost_void_entry.yml
+# 顶部：左侧是周期剩余时间和悬赏委托完成进度 右侧 TAB 为 悬赏委托 / 周期 / 常规
+screen_id: lost_void_entry
+area_list:
+- area_name: 按钮-悬赏委托
+  pc_rect: [1010, 35, 1185, 90]
+- area_name: 区域-悬赏委托-进度
+  pc_rect: [530, 60, 940, 100]
+- area_name: 按钮-常规
+  pc_rect: [1585, 35, 1680, 88]
+- area_name: 按钮-周期
+  pc_rect: [1360, 35, 1460, 88]

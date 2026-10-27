@@ -1,5 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from one_dragon.utils import cal_utils
-from zzz_od.controller.zzz_pc_controller import ZPcController
+
+if TYPE_CHECKING:
+    from zzz_od.controller.zzz_pc_controller import ZPcController
 
 
 class AngleTurnCompensator:

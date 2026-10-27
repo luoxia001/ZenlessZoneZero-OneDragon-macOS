@@ -145,7 +145,8 @@ class BackToNormalWorld(ZOperation):
 
         # 通用返回按钮（兜底点击型）
         # 区域位于左上角的红色返回按钮，不进行识别，相当于点击空白区域，故不能提前使用
-        click_back = self.round_by_click_area('画面-通用', '返回')
+        # 用单独的「返回-兜底点击」区域：画面变体里左上角可能有别的按钮（如移动端大世界的菜单按钮），需要另选不误触的点
+        click_back = self.round_by_click_area('画面-通用', '返回-兜底点击')
         if click_back.is_success:
             # 由于上方识别可能耗时较长
             # 这样就可能 当前截图是没加载的 耗时识别后加载好 但点击了返回

@@ -346,6 +346,7 @@ class IntelBoardApp(ZApplication):
                 ('完成', OperationRoundResultEnum.WAIT),
                 ('下一步', OperationRoundResultEnum.WAIT),
                 ('确认', OperationRoundResultEnum.WAIT),
+                ('退出', OperationRoundResultEnum.WAIT),  # 挑战失败时结算页只有「退出」
             ],
             wait_wait=1,
             retry_wait=1,

@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING
 
+import cv2
 from cv2.typing import MatLike
 
 from one_dragon.base.geometry.point import Point
@@ -29,6 +30,23 @@ class FindAreaResultEnum(Enum):
     TRUE = 1  # 找到了
     FALSE = 0  # 找不到
     AREA_NO_CONFIG = -2  # 区域配置找不到
+
+
+def crop_area(screen: MatLike, area: ScreenArea) -> MatLike:
+    """
+    裁剪区域 区域配置了 template_scale 时把裁剪结果缩放到模板的尺寸
+
+    Args:
+        screen: 游戏画面
+        area: 区域
+
+    Returns:
+        裁剪（并缩放）后的图片
+    """
+    img = cv2_utils.crop_image_only(screen, area.rect)
+    if area.template_scale != 1.0:
+        img = cv2.resize(img, None, fx=area.template_scale, fy=area.template_scale, interpolation=cv2.INTER_AREA)
+    return img
 
 
 def find_area(
@@ -176,9 +194,12 @@ def find_area_in_screen(
     elif area.is_template_area:
         rect = area.rect
 
-        mrl = ctx.tm.crop_and_match_template(screen, rect, area.template_sub_dir, area.template_id,
-                                             threshold=area.template_match_threshold)
-        find = mrl.max is not None
+        for template_id in [area.template_id] + area.alt_template_id_list:
+            mrl = ctx.tm.crop_and_match_template(screen, rect, area.template_sub_dir, template_id,
+                                                 threshold=area.template_match_threshold)
+            if mrl.max is not None:
+                find = True
+                break
     return FindAreaResultEnum.TRUE if find else FindAreaResultEnum.FALSE
 
 

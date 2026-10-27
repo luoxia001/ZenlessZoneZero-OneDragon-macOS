@@ -26,24 +26,6 @@ WDA_NONE = 0x0
 WDA_EXCLUDEFROMCAPTURE = 0x11
 
 
-_user32 = ctypes.windll.user32
-
-_user32.GetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int]
-_user32.GetWindowLongW.restype = ctypes.c_long
-_user32.SetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_long]
-_user32.SetWindowLongW.restype = ctypes.c_long
-_user32.SetWindowDisplayAffinity.argtypes = [wintypes.HWND, wintypes.DWORD]
-_user32.SetWindowDisplayAffinity.restype = wintypes.BOOL
-_user32.GetAsyncKeyState.argtypes = [ctypes.c_int]
-_user32.GetAsyncKeyState.restype = ctypes.c_short
-_user32.IsIconic.argtypes = [wintypes.HWND]
-_user32.IsIconic.restype = wintypes.BOOL
-_user32.IsWindowVisible.argtypes = [wintypes.HWND]
-_user32.IsWindowVisible.restype = wintypes.BOOL
-_user32.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
-_user32.GetAncestor.restype = wintypes.HWND
-
-
 class WINDOWPLACEMENT(ctypes.Structure):
     _fields_ = [
         ("length", wintypes.UINT),
@@ -55,14 +37,35 @@ class WINDOWPLACEMENT(ctypes.Structure):
     ]
 
 
-_user32.GetWindowPlacement.argtypes = [wintypes.HWND, ctypes.POINTER(WINDOWPLACEMENT)]
-_user32.GetWindowPlacement.restype = wintypes.BOOL
+# 非 Windows 系统没有 user32 下面的函数都直接返回默认值
+_user32 = None
+if sys.platform == "win32":
+    _user32 = ctypes.windll.user32
+
+    _user32.GetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int]
+    _user32.GetWindowLongW.restype = ctypes.c_long
+    _user32.SetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_long]
+    _user32.SetWindowLongW.restype = ctypes.c_long
+    _user32.SetWindowDisplayAffinity.argtypes = [wintypes.HWND, wintypes.DWORD]
+    _user32.SetWindowDisplayAffinity.restype = wintypes.BOOL
+    _user32.GetAsyncKeyState.argtypes = [ctypes.c_int]
+    _user32.GetAsyncKeyState.restype = ctypes.c_short
+    _user32.IsIconic.argtypes = [wintypes.HWND]
+    _user32.IsIconic.restype = wintypes.BOOL
+    _user32.IsWindowVisible.argtypes = [wintypes.HWND]
+    _user32.IsWindowVisible.restype = wintypes.BOOL
+    _user32.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+    _user32.GetAncestor.restype = wintypes.HWND
+    _user32.GetWindowPlacement.argtypes = [wintypes.HWND, ctypes.POINTER(WINDOWPLACEMENT)]
+    _user32.GetWindowPlacement.restype = wintypes.BOOL
+
 
 _shcore = None
-try:
-    _shcore = ctypes.windll.shcore
-except Exception:
-    _shcore = None
+if sys.platform == "win32":
+    try:
+        _shcore = ctypes.windll.shcore
+    except Exception:
+        _shcore = None
 
 if _shcore is not None:
     _shcore.GetProcessDpiAwareness.argtypes = [wintypes.HANDLE, ctypes.POINTER(ctypes.c_int)]
@@ -101,6 +104,8 @@ def is_process_dpi_aware() -> bool:
 
 
 def is_key_pressed(vk: int) -> bool:
+    if _user32 is None:
+        return False
     state = _user32.GetAsyncKeyState(vk)
     return bool(state & 0x8000)
 
@@ -202,7 +207,7 @@ def _root_hwnd(hwnd: int) -> int:
 
 
 def is_window_minimized(hwnd: int | None) -> bool:
-    if hwnd is None or int(hwnd) == 0:
+    if _user32 is None or hwnd is None or int(hwnd) == 0:
         return False
     original_hwnd = int(hwnd)
     root_hwnd = _root_hwnd(original_hwnd)
@@ -226,14 +231,14 @@ def is_window_minimized(hwnd: int | None) -> bool:
 
 def is_window_visible(hwnd: int | None) -> bool:
     """Check whether a window has the WS_VISIBLE style set."""
-    if hwnd is None or int(hwnd) == 0:
+    if _user32 is None or hwnd is None or int(hwnd) == 0:
         return False
     root_hwnd = _root_hwnd(int(hwnd))
     return bool(_user32.IsWindowVisible(root_hwnd))
 
 
 def set_window_click_through(hwnd: int | None, click_through: bool) -> bool:
-    if hwnd is None or int(hwnd) == 0:
+    if _user32 is None or hwnd is None or int(hwnd) == 0:
         return False
 
     ctypes.set_last_error(0)
@@ -254,7 +259,7 @@ def set_window_click_through(hwnd: int | None, click_through: bool) -> bool:
 
 
 def set_window_display_affinity(hwnd: int | None, exclude_from_capture: bool) -> bool:
-    if hwnd is None or int(hwnd) == 0:
+    if _user32 is None or hwnd is None or int(hwnd) == 0:
         return False
 
     affinity = WDA_EXCLUDEFROMCAPTURE if exclude_from_capture else WDA_NONE

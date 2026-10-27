@@ -1,0 +1,8 @@
+sub_dir: mobile_battle
+template_id: btn_menu
+template_name: 战斗-菜单
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 78, 62
+- 150, 125

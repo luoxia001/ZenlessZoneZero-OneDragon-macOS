@@ -1,0 +1,12 @@
+sub_dir: mobile_agent_state
+template_id: life_deduction_3_1
+template_name: 血量扣减-前台
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 310, 72
+- 685, 73
+# 移动端受伤后血条上残留的红色段约 (204,25,25) 比 PC 的暗红 (140~160,30~50,30~50) 更亮
+state_override:
+  lower_color: [185, 10, 10]
+  upper_color: [225, 45, 45]

@@ -1,0 +1,19 @@
+# 快捷手册-训练 的移动端差异 其余区域沿用 assets/game_data/screen_info/compendium_training.yml
+# 移动端每个 TAB 是独立按钮 顺序为 目标 日常 训练 作战 战术
+# 选中的 TAB 是黄底黑字（PC 是黄字）。识别标记过滤黄色背景：只有选中的 TAB 留下黄底 文字以空洞形式被 OCR 读出
+# 区域只框住文字附近 避开 TAB 左上角同样是黄色的 NEW! 角标
+screen_id: compendium_training
+area_list:
+- area_name: TAB-目标
+  pc_rect: [734, 128, 844, 186]
+- area_name: TAB-日常
+  pc_rect: [933, 128, 1043, 186]
+- area_name: TAB-训练
+  pc_rect: [1132, 128, 1242, 186]
+  color_range: [[200, 160, 0], [255, 235, 90]]
+- area_name: TAB-作战
+  pc_rect: [1332, 128, 1442, 186]
+- area_name: TAB-战术
+  pc_rect: [1531, 128, 1641, 186]
+- area_name: 按钮-关闭
+  pc_rect: [1772, 215, 1850, 295]

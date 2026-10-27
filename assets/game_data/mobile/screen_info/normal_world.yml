@@ -1,0 +1,22 @@
+# 大世界 的移动端差异 其余区域沿用 assets/game_data/screen_info/normal_world.yml
+# 移动端右上角是小地图 小地图右下方的圆形「信号」按钮打开传送用的地图
+# 快捷手册是顶部图标栏里带 Z 的文档图标
+screen_id: normal_world
+area_list:
+- area_name: 星期
+  pc_rect: [250, 50, 380, 112]
+- area_name: 菜单
+  pc_rect: [90, 40, 235, 140]
+# 地图按钮不用模板 直接点击：小地图的动态裁剪是用「地图模板位置 - PC 固定偏移」算的 移动端偏移不同
+# 不做模板匹配时 小地图走下面的静态区域 再缩放到 PC 尺寸识别
+- area_name: 地图
+  area_type: none
+  pc_rect: [1630, 308, 1730, 408]
+  template_sub_dir: ''
+  template_id: ''
+- area_name: 小地图
+  pc_rect: [1410, 153, 1666, 409]
+- area_name: 快捷手册
+  pc_rect: [1428, 62, 1505, 134]
+  template_sub_dir: mobile_normal_world
+  template_id: compendium

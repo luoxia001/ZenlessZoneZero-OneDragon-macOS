@@ -1,0 +1,17 @@
+# 恶名狩猎 的移动端差异
+# 只写和 PC 不同的区域 其余区域沿用 assets/game_data/screen_info/notorious_hunt.yml
+screen_id: notorious_hunt
+area_list:
+# 选好 Boss 后右上角「挑战等级」下拉框展开的选项：从上到下 Lv.30 40 50 60 65 每项间隔约 85
+# PC 的区域只到 y=424 最下面的 Lv.65（y≈477）在框外 OCR 读不到 会按相似度误选 Lv.60
+- area_name: 难度选择区域
+  pc_rect: [1560, 130, 1880, 530]
+# Boss 详情页底部「剩余奖励次数:3/3」 移动端整行在 x 1262-1479 PC 的位置偏右 读到的是别的数字
+- area_name: 剩余奖励次数
+  pc_rect: [1255, 995, 1490, 1037]
+# 上面那行里「3/3」的第一个数字
+- area_name: 剩余次数
+  pc_rect: [1414, 998, 1444, 1036]
+# 领奖面板右上角「全部领取」
+- area_name: 全部领取
+  pc_rect: [1340, 290, 1480, 342]

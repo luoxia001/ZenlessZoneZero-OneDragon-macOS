@@ -91,7 +91,8 @@ try:
             self._launch_timer.timeout.connect(self._after_app_launch)
             self._launch_timer.start(2000)  # 2秒后发送，确保UI完全渲染
 
-            self.overlay_manager = OverlayManager.create(self.ctx, parent=self)
+            # 叠加层依赖 Windows 窗口接口 其他系统不启动
+            self.overlay_manager = OverlayManager.create(self.ctx, parent=self) if sys.platform == 'win32' else None
             if self.overlay_manager is not None:
                 self.overlay_manager.start()
 
@@ -148,10 +149,11 @@ try:
             )
             self.add_sub_interface(ZStandaloneAppInterface(self.ctx, parent=self))
 
-            # 画中画
-            from one_dragon_qt.widgets.pip_button import PipButton
-            self.pip_btn = PipButton(self.ctx, parent=self)
-            self.add_nav_widget(self.pip_btn)
+            # 画中画 依赖 Windows 窗口截图 其他系统不显示
+            if sys.platform == 'win32':
+                from one_dragon_qt.widgets.pip_button import PipButton
+                self.pip_btn = PipButton(self.ctx, parent=self)
+                self.add_nav_widget(self.pip_btn)
 
             # 点赞
             from one_dragon_qt.view.like_interface import LikeInterface
@@ -256,7 +258,7 @@ try:
             """异步处理应用启动后需要处理的事情"""
             self._check_version_runner.start()
             self._check_first_run()
-            self.check_resource_updates(force=True)
+            # 不在启动时自动检查启动器 / 模型更新 需要时到「资源管理」手动检查
             self.on_welcome_dialog_closed()
 
         def closeEvent(self, event: QCloseEvent) -> None:

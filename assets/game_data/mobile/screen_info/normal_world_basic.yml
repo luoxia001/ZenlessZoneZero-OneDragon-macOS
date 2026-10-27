@@ -1,0 +1,24 @@
+# 大世界-普通 的移动端差异
+# 只写和 PC 不同的区域 其余区域沿用 assets/game_data/screen_info/normal_world_basic.yml
+# 移动端没有 PC 的功能导览、预备编队图标 先用左上角的「星期」文字识别画面
+# 快捷手册是顶部图标栏里带 Z 的文档图标
+screen_id: normal_world_basic
+area_list:
+- area_name: 星期
+  id_mark: true
+  pc_rect: [250, 50, 380, 112]
+- area_name: 按钮-菜单
+  pc_rect: [90, 40, 235, 140]
+- area_name: 快捷手册
+  pc_rect: [1428, 62, 1505, 134]
+  template_sub_dir: mobile_normal_world
+  template_id: compendium
+# 功能导览是顶部图标栏最右侧的圆形 ⟳ 图标 上方常有 NEW! 角标 模板只取圆心部分
+# 角标遮挡时可能识别不到 所以暂不作为识别标记
+- area_name: 功能导览
+  id_mark: false
+  pc_rect: [1763, 62, 1839, 138]
+  template_sub_dir: mobile_normal_world
+  template_id: function_menu
+- area_name: 预备编队
+  id_mark: false

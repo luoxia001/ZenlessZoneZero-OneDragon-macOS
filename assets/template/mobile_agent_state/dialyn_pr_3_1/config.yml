@@ -1,0 +1,9 @@
+sub_dir: mobile_agent_state
+template_id: dialyn_pr_3_1
+template_name: 角色状态-琉音-好评-31
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 150, 152
+- 246, 154
+# 由 PC 坐标换算生成（x' = 1.189x - 1, y' = 1.229y） 还没有逐个实拍校对

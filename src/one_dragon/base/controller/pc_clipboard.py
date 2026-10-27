@@ -1,14 +1,12 @@
 import time
 
-import pywintypes
-import win32clipboard
-import win32con
 from pynput.keyboard import Controller, Key
 
 from one_dragon.utils.log_utils import log, mask_text
 
 
 class PcClipboard:
+    """Windows 剪贴板操作 pywin32 只在调用时导入 避免其它平台导入本模块时失败"""
 
     @staticmethod
     def copy_and_paste(text: str) -> None:
@@ -29,6 +27,8 @@ class PcClipboard:
 
         :return: 无
         """
+        import win32clipboard
+
         try:
             win32clipboard.OpenClipboard()
             win32clipboard.EmptyClipboard()
@@ -46,6 +46,9 @@ class PcClipboard:
         :param text: 要复制到剪贴板的文本
         :return: 无
         """
+        import win32clipboard
+        import win32con
+
         try:
             # 脱敏（前后10%的字符不加密）
             log.info(f'复制文字到剪切板:{mask_text(text)}')
@@ -66,6 +69,10 @@ class PcClipboard:
 
         :return: 从剪贴板获取的文本，如果获取失败则返回空字符串
         """
+        import pywintypes
+        import win32clipboard
+        import win32con
+
         keyboard = Controller()
 
         try:

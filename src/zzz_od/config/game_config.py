@@ -296,3 +296,30 @@ class GameConfig(BasicGameConfig):
     @gamepad_turn_speed.setter
     def gamepad_turn_speed(self, new_value: float):
         self.update('gamepad_turn_speed', new_value)
+
+    @property
+    def maatools_host(self) -> str:
+        """PlayCover MaaTools 服务地址"""
+        return self.get('maatools_host', '127.0.0.1')
+
+    @maatools_host.setter
+    def maatools_host(self, new_value: str) -> None:
+        self.update('maatools_host', new_value)
+
+    @property
+    def maatools_port(self) -> int:
+        """PlayCover MaaTools 服务端口 和 PlayCover 游戏设置「绕过」页里的端口一致"""
+        return self.get('maatools_port', 1717)
+
+    @maatools_port.setter
+    def maatools_port(self, new_value: int) -> None:
+        self.update('maatools_port', new_value)
+
+    @property
+    def playcover_bundle_id(self) -> str:
+        """PlayCover 中游戏的 Bundle ID 用于切换前台输入文字 国服为 com.miHoYo.Nap"""
+        return self.get('playcover_bundle_id', 'com.miHoYo.Nap')
+
+    @playcover_bundle_id.setter
+    def playcover_bundle_id(self, new_value: str) -> None:
+        self.update('playcover_bundle_id', new_value)

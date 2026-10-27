@@ -37,3 +37,12 @@ class CoffeeConfig(ApplicationConfig):
     @run_charge_plan_afterwards.setter
     def run_charge_plan_afterwards(self, new_value: bool) -> None:
         self.update('run_charge_plan_afterwards', new_value)
+
+    @property
+    def coffee_name(self) -> str:
+        """额外咖啡喝完后点的咖啡 不同咖啡店的菜单不同 默认汀曼特调"""
+        return self.get('coffee_name', '汀曼特调')
+
+    @coffee_name.setter
+    def coffee_name(self, new_value: str) -> None:
+        self.update('coffee_name', new_value)

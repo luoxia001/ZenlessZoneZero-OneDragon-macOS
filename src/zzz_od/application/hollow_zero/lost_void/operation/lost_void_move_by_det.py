@@ -681,15 +681,18 @@ class LostVoidMoveByDet(ZOperation):
             return True
 
         # 2. 检测图标是否变大
+        # 尺寸放在画面配置里 不同画面（如移动端界面缩放更大）的图标大小不同
+        interact_min_width = self.ctx.screen_loader.get_area('迷失之地-大世界', '尺寸-到达-感叹号图标').rect.width
+        entry_min_width = self.ctx.screen_loader.get_area('迷失之地-大世界', '尺寸-到达-入口图标').rect.width
         for result in frame_result.results:
             if result.detect_class.class_name == LostVoidDetector.CLASS_DISTANCE:
                 # 不考虑 [距离]白点
                 continue
 
             if result.detect_class.class_name == LostVoidDetector.CLASS_INTERACT:
-                min_width = 70  # 感叹号的图标会大一点
+                min_width = interact_min_width  # 感叹号的图标会大一点
             else:
-                min_width = 50  # 普通入口的图标
+                min_width = entry_min_width  # 普通入口的图标
 
             if result.width > min_width and result.height > min_width:
                 return True

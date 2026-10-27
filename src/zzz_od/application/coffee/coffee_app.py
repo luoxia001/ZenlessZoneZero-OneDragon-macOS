@@ -203,16 +203,16 @@ class CoffeeApp(ZApplication):
         return self.round_retry(status='没找到目标咖啡', wait=1)
 
     def _get_coffee_to_choose(self) -> list[str]:
-        """获取候选咖啡，额外咖啡喝完后固定选择汀曼特调"""
+        """获取候选咖啡，额外咖啡喝完后选择配置的咖啡（默认汀曼特调）"""
         to_choose_list: list[str] = []
         for coffee in self.ctx.compendium_service.get_extra_coffee_list():
             if coffee.coffee_name in self.had_coffee_list:
                 continue
             to_choose_list.append(coffee.coffee_name)
 
-        tinman_coffee = '汀曼特调'
-        if tinman_coffee not in self.had_coffee_list:
-            to_choose_list.append(tinman_coffee)
+        main_coffee = self.config.coffee_name
+        if main_coffee not in self.had_coffee_list:
+            to_choose_list.append(main_coffee)
         return to_choose_list
 
     @node_from(from_name='选择咖啡')

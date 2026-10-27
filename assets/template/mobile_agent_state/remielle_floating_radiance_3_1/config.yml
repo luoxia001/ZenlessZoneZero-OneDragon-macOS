@@ -1,0 +1,11 @@
+sub_dir: mobile_agent_state
+template_id: remielle_floating_radiance_3_1
+template_name: 角色状态-蕾米埃尔-浮晖-31
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 166, 147
+- 247, 149
+# 由 PC 坐标换算生成（x' = 1.189x - 1, y' = 1.229y） 还没有逐个实拍校对
+# 实拍校对：满格时计量条在 x 165~248 换算出的 168~251 右端多出 3 列在条外 满格也只读到 98
+# 规则要求 浮晖{100,100} 所以把框收进条内 166~247

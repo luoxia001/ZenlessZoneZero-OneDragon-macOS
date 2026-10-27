@@ -1,0 +1,37 @@
+# 式舆防卫战 的移动端差异
+# 只写和 PC 不同的区域 其余区域沿用 assets/game_data/screen_info/shiyu_defense.yml
+# 选关主界面：5 个节点在上半部分（节点模板和 PC 一样 可以直接匹配）
+# 下方 4 张卡片依次是 剧变节点 X/5、稳定节点、纷争节点、空卡；左下角圆形图标是奖励入口
+screen_id: shiyu_defense
+area_list:
+- area_name: 战报
+  id_mark: true
+  pc_rect: [1500, 30, 1740, 92]
+  text: 战报
+# 剧变节点卡片上的进度 X/5 PC 的位置在移动端会读到别的数字
+- area_name: 剧变节点进度
+  pc_rect: [455, 830, 575, 900]
+- area_name: 奖励入口
+  pc_rect: [95, 925, 205, 1035]
+# 剧变节点奖励领取 弹窗
+- area_name: 领取奖励-界面
+  pc_rect: [300, 135, 620, 190]
+  text: 剧变节点奖励领取
+- area_name: 全部领取
+  pc_rect: [1335, 280, 1580, 328]
+  text: 全部领取
+- area_name: 领取奖励-关闭
+  pc_rect: [1545, 110, 1630, 180]
+# 节点按钮：移动端图标比 PC 大约 5% 不缩放时匹配度只有 0.85 左右 达不到 PC 的阈值 0.9（实测节点 05 进行中时找不到）
+# 这些模板实际认的是「进行中」节点的高亮徽章 认不出数字 要点的下一个节点正好就是进行中的那个
+# 实测进行中徽章 0.84~0.94 其它没有徽章的节点 ≤0.71 所以阈值放到 0.8
+- area_name: 节点-01
+  template_match_threshold: 0.8
+- area_name: 节点-02
+  template_match_threshold: 0.8
+- area_name: 节点-03
+  template_match_threshold: 0.8
+- area_name: 节点-04
+  template_match_threshold: 0.8
+- area_name: 节点-05
+  template_match_threshold: 0.8

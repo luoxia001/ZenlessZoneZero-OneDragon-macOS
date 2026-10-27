@@ -1,0 +1,9 @@
+sub_dir: mobile_agent_state
+template_id: qingyi_3_2
+template_name: 角色状态-青衣-32
+template_shape: rectangle
+auto_mask: true
+point_list:
+- 686, 118
+- 749, 119
+# 由 PC 坐标换算生成（x' = 1.189x - 1, y' = 1.229y） 还没有逐个实拍校对

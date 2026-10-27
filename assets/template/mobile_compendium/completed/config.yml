@@ -1,0 +1,8 @@
+sub_dir: mobile_compendium
+template_id: completed
+template_name: 已完成
+template_shape: circle
+auto_mask: true
+point_list:
+- 1608, 284
+- 1642, 284

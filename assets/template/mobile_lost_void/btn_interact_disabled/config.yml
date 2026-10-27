@@ -1,0 +1,8 @@
+sub_dir: mobile_lost_void
+template_id: btn_interact_disabled
+template_name: 交互-不可用
+template_shape: circle
+auto_mask: true
+point_list:
+- 1535, 800
+- 1590, 800
