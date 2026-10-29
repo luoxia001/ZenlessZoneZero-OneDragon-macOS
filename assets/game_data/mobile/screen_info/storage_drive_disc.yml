@@ -1,0 +1,8 @@
+# 仓库-驱动仓库 的移动端差异 其余区域沿用 assets/game_data/screen_info/storage_drive_disc.yml
+# 布局和音擎仓库相同 标题「驱动仓库[ 数量 ]」在 y≈160-195 「拆解」按钮在左下 y≈900-955
+screen_id: storage_drive_disc
+area_list:
+- area_name: 标题-驱动仓库
+  pc_rect: [88, 155, 215, 200]
+- area_name: 按钮-拆解
+  pc_rect: [300, 900, 520, 955]

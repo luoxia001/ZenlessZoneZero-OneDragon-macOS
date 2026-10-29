@@ -1,0 +1,20 @@
+# 仓库-驱动仓库-驱动盘拆解 的移动端差异 其余区域沿用 assets/game_data/screen_info/drive_disc_dismantle.yml
+# 底部「快速选择」「拆解」按钮在 y≈990-1040（PC 拆解在右侧 y≈900）
+# 快速选择弹窗：全选已弃置 y≈455-482 B / A及以下 y≈590-615 S及以下 y≈660-690 确认 x≈1120-1190 y≈820-860
+# 拆解确认弹窗还没实拍（建档时没有可拆的驱动盘） 沿用 PC 位置
+screen_id: drive_disc_dismantle
+area_list:
+- area_name: 按钮-快速选择
+  pc_rect: [200, 975, 470, 1055]
+- area_name: 按钮-全选已弃置
+  pc_rect: [640, 440, 860, 500]
+- area_name: 按钮-B
+  pc_rect: [640, 575, 860, 630]
+- area_name: 按钮-A及以下
+  pc_rect: [1080, 575, 1270, 630]
+- area_name: 按钮-S及以下
+  pc_rect: [640, 645, 860, 705]
+- area_name: 按钮-快速选择-确认
+  pc_rect: [1060, 805, 1260, 875]
+- area_name: 按钮-拆解
+  pc_rect: [1600, 975, 1800, 1055]

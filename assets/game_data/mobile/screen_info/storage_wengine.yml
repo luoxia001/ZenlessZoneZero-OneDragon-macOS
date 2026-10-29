@@ -1,0 +1,12 @@
+# 仓库-音擎仓库 的移动端差异 其余区域沿用 assets/game_data/screen_info/storage_wengine.yml
+# 移动端标签页在左侧竖排（音擎 / 驱动盘 / ...） 标题「音擎仓库[ 数量 ]」下移到 y≈160-195 底部按钮在 y≈900-955
+screen_id: storage_wengine
+area_list:
+- area_name: 标题-音擎仓库
+  pc_rect: [88, 155, 215, 200]
+- area_name: 按钮-回收
+  pc_rect: [300, 900, 520, 955]
+- area_name: 左上角-街区
+  pc_rect: [330, 40, 460, 90]
+- area_name: TAB-驱动盘
+  pc_rect: [100, 380, 195, 470]
